@@ -2,7 +2,7 @@
 
 namespace sosim
 {
-void run()
+void Kernel::run()
 {
     // Running the Memory Manager and perhaps unblocking some process
     if(auto process = mManager.run())
@@ -16,9 +16,9 @@ void run()
     // Sorting ready processes by the scheduler
     scheduler.run();
     
-    if(cpu.state() == Idle || !scheduler.is_preemptive())
+    if(cpu.state() == Idle)
         this->next();
-    else
+    else if(scheduler.is_preemptive())
     {
         if(quantum)
             quantum--;
