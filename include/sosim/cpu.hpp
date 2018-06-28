@@ -45,7 +45,8 @@ public:
     {
         if(!process)
             return Idle;
-        return !process->pid? Exec : Overload;
+        // If the pid is 0 (i.e. the kernel), then we are in overload state.
+        return !process->pid? Overload : Exec;
     }
 
 private:
