@@ -12,10 +12,12 @@ namespace sosim
 class Kernel
 {
 public:
-    explicit Kernel(CPU cpu, Scheduler scheduler, MemoryManager mManager) :
+    explicit Kernel(CPU cpu, Scheduler scheduler, MemoryManager mManager,
+                    std::list<shared_ptr<Process> > &blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
         mManager(std::move(mManager)), push_requests(),
-        self(make_shared<Process>(0, -1, -1, -1, 0, 0))
+        self(make_shared<Process>(0, -1, -1, -1, 0, 0),
+        blocked(std::move(blocked))
     {
     }
 
@@ -35,6 +37,7 @@ private:
     MemoryManager mManager;
 
     std::list<std::shared_ptr<Process> > push_requests;
+    std::list<shared_ptr<Process> > blocked;
 
     unsigned quantum;
     unsigned overload;

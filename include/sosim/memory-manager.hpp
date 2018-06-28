@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <vector>
 #include <memory>
 #include <utility>
 #include <sosim/commom.hpp>
@@ -9,10 +10,12 @@ namespace sosim
 class MemoryManager
 {
 public:
-    explicit MemoryManager(const unsigned shift_delay, const int ram_pages,
-                           const int virtual_pages) :
+    explicit MemoryManager(unsigned shift_delay, int ram_pages,
+                           int virtual_pages,
+                           std::list<shared_ptr<Process> > &blocked) :
         shift_delay(shift_delay), ram(ram_pages, 0), swap(),
-        alloc_position(0), page_table(virtual_pages, {-1, false}), bloqued()
+        alloc_position(0), page_table(virtual_pages, {-1, false}),
+        blocked(blocked)
     {
     }
 
@@ -27,13 +30,13 @@ private:
 
     unsigned shift_delay;
 
-    std::list<unsigned> ram;
-    std::list<unsigned> swap;
+    std::vector<unsigned> ram;
+    std::vector<unsigned> swap;
 
     int alloc_position;
 
-    std::list<pair<int, bool> > page_table;
+    std::vector<pair<int, bool> > page_table;
 
-    std::list<std::shared_ptr<Process> > bloqued;
+    std::list<std::shared_ptr<Process> > &blocked;
 };
 }

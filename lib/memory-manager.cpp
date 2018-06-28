@@ -13,7 +13,7 @@ auto MemoryManager::check(std::shared_ptr<Process> process) -> std::shared_ptr<P
         // Page fault
         else if(!page_table[ref].second)
         {
-            bloqued.push_back(std::move(process));
+            blocked.push_back(std::move(process));
             return nullptr;
         }
     }
@@ -36,7 +36,7 @@ auto MemoryManager::alloc(std::shared_ptr<Process> process) -> std::shared_ptr<P
             }
             else
             {
-                bloqued.push_back(std::move(process));
+                blocked.push_back(std::move(process));
                 return nullptr;
             }
         }
