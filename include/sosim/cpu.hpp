@@ -30,12 +30,12 @@ public:
         }
     }
 
-    void push(std::shared_ptr<Process> process)
+    void push(std::unique_ptr<Process> process)
     {
         this->process = std::move(process);
     }
 
-    auto drop() -> std::shared_ptr<Process>
+    auto drop() -> std::unique_ptr<Process>
     {
         return std::move(this->process);
     }
@@ -49,6 +49,6 @@ public:
     }
 
 private:
-    std::shared_ptr<Process> process;
+    std::unique_ptr<Process> process;
 };
 }

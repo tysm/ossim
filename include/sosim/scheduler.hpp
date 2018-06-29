@@ -1,6 +1,5 @@
 #pragma once
 #include <list>
-#include <vector>
 #include <memory>
 #include <utility>
 #include <algorithm>
@@ -16,13 +15,15 @@ public:
     {
     }
 
-    void push(std::shared_ptr<Process> process)
+    void push(std::unique_ptr<Process> process)
     {
         ready.push_back(std::move(process));
-        std::stable_sort(ready.begin(), ready.end(), comparator);
+        ready.sort([this](const std::unique_ptr<Process> &i,
+                          const std::unique_ptr<Process> &j)
+                         { return this->comparator(i, j); });
     }
 
-    auto next() -> std::shared_ptr<Process>
+    auto next() -> std::unique_ptr<Process>
     {
         if(ready.empty())
             return nullptr;
@@ -31,25 +32,19 @@ public:
         return process;
     }
 
-    auto get_ready() -> std::vector<std::shared_ptr<Process> >
-    {
-        return std::vector<std::shared_ptr<Process> >(ready.begin(),
-                                                      ready.end());
-    }
-
     virtual bool is_preemptive()
     {
         return false;
     }
 
 private:
-    virtual bool comparator(const std::shared_ptr<Process> &i,
-                            const std::shared_ptr<Process> &j)
+    virtual bool comparator(const std::unique_ptr<Process> &i,
+                            const std::unique_ptr<Process> &j)
     {
         return false;
     }
 
-    std::list<std::shared_ptr<Process> > ready;
+    std::list<std::unique_ptr<Process> > ready;
 };		
 
 class NotPreemptive : public Scheduler
@@ -63,8 +58,8 @@ class FIFO : public NotPreemptive
 class SJF : public NotPreemptive
 {
 private:
-    bool comparator(const std::shared_ptr<Process> &i,
-                    const std::shared_ptr<Process> &j) override
+    bool comparator(const std::unique_ptr<Process> &i,
+                    const std::unique_ptr<Process> &j) override
     {
         return i->execTime < j->execTime;
     }
@@ -86,8 +81,8 @@ class RoundRobin : public Preemptive
 class EDF : public Preemptive
 {
 private:
-    bool comparator(const std::shared_ptr<Process> &i,
-                    const std::shared_ptr<Process> &j) override
+    bool comparator(const std::unique_ptr<Process> &i,
+                    const std::unique_ptr<Process> &j) override
     {
         return i->deadline < j->deadline;
     }
