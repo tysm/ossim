@@ -2,7 +2,7 @@
 
 namespace sosim
 {
-auto MemoryManager::check(std::unique_ptr<Process> process) -> std::unique_ptr<Process>
+auto MemoryManager::check(std::shared_ptr<Process> process) -> std::shared_ptr<Process>
 {
     for(auto ref : process->page_refs)
     {
@@ -13,14 +13,14 @@ auto MemoryManager::check(std::unique_ptr<Process> process) -> std::unique_ptr<P
         // Page fault
         else if(!page_table[ref].second)
         {
-            blocked.push(std::move(process));
+            blocked.push_back(std::move(process));
             return nullptr;
         }
     }
     return process;
 }
 
-auto MemoryManager::alloc(std::unique_ptr<Process> process) -> std::unique_ptr<Process>
+auto MemoryManager::alloc(std::shared_ptr<Process> process) -> std::shared_ptr<Process>
 {
     for(auto ref : process->page_refs)
     {
@@ -36,7 +36,7 @@ auto MemoryManager::alloc(std::unique_ptr<Process> process) -> std::unique_ptr<P
             }
             else
             {
-                blocked.push(std::move(process));
+                blocked.push_back(std::move(process));
                 return nullptr;
             }
         }

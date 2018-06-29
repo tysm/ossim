@@ -12,7 +12,7 @@ void Kernel::run()
     while(!push_requests.empty())
     {
         scheduler->push(std::move(push_requests.front()));
-        push_requests.pop();
+        push_requests.pop_front();
     }
 
     if(cpu.state() == CPUState::Idle)

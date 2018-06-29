@@ -1,5 +1,5 @@
 #pragma once
-#include <queue>
+#include <list>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -8,36 +8,6 @@
 
 namespace sosim
 {
-class Comparator
-{
-public:
-    virtual bool operator() (const std::unique_ptr<Process> &i,
-                             const std::unique_ptr<Process> &j)
-    {
-        return false;
-    }
-};
-
-class ComparatorSJF : public Comparator
-{
-public:
-    bool operator() (const std::unique_ptr<Process> &i,
-                     const std::unique_ptr<Process> &j) override
-    {
-        return i->execTime < j->execTime;
-    }
-};
-
-class ComparatorEDF : public Comparator
-{
-public:
-    bool operator() (const std::unique_ptr<Process> &i,
-                     const std::unique_ptr<Process> &j) override
-    {
-        return i->deadline < j->deadline;
-    }
-};
-
 class Scheduler
 {
 public:
@@ -46,18 +16,25 @@ public:
     {
     }
 
-    void push(std::unique_ptr<Process> process)
+    void push(std::shared_ptr<Process> process)
     {
-        this->ready.push(std::move(process));
+        ready.push_back(std::move(process));
+        std::stable_sort(ready.begin(), ready.end(), comparator);
     }
 
-    auto next() -> std::unique_ptr<Process>
+    auto next() -> std::shared_ptr<Process>
     {
-        if(this->ready.empty())
+        if(ready.empty())
             return nullptr;
-        auto process = std::move(this->ready.front());
-        this->ready.pop();
+        auto process = std::move(ready.front());
+        ready.pop_front();
         return process;
+    }
+
+    auto get_ready() -> std::vector<std::shared_ptr<Process> >
+    {
+        return std::vector<std::shared_ptr<Process> >(ready.begin(),
+                                                      ready.end());
     }
 
     virtual bool is_preemptive()
@@ -66,7 +43,13 @@ public:
     }
 
 private:
-    std::queue<std::unique_ptr<Process> > ready;
+    virtual bool comparator(const std::shared_ptr<Process> &i,
+                            const std::shared_ptr<Process> &j)
+    {
+        return false;
+    }
+
+    std::list<std::shared_ptr<Process> > ready;
 };		
 
 class NotPreemptive : public Scheduler
@@ -80,9 +63,11 @@ class FIFO : public NotPreemptive
 class SJF : public NotPreemptive
 {
 private:
-    std::priority_queue<std::unique_ptr<Process>,
-        std::vector<std::unique_ptr<Process> >,
-        ComparatorSJF> ready;
+    bool comparator(const std::shared_ptr<Process> &i,
+                    const std::shared_ptr<Process> &j) override
+    {
+        return i->execTime < j->execTime;
+    }
 };
 
 class Preemptive : public Scheduler
@@ -101,8 +86,10 @@ class RoundRobin : public Preemptive
 class EDF : public Preemptive
 {
 private:
-    std::priority_queue<std::unique_ptr<Process>,
-        std::vector<std::unique_ptr<Process> >,
-        ComparatorEDF> ready;
+    bool comparator(const std::shared_ptr<Process> &i,
+                    const std::shared_ptr<Process> &j) override
+    {
+        return i->deadline < j->deadline;
+    }
 };
 }
