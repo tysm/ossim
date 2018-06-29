@@ -12,18 +12,19 @@ namespace sosim
 class Kernel
 {
 public:
-    explicit Kernel(CPU cpu, Scheduler scheduler, MemoryManager mManager,
-                    std::queue<std::shared_ptr<Process> > &blocked) :
+    explicit Kernel(CPU cpu, std::unique_ptr<Scheduler> scheduler,
+                    std::unique_ptr<MemoryManager> mManager,
+                    std::queue<std::unique_ptr<Process> > &blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
         mManager(std::move(mManager)), push_requests(),
-        self(std::make_shared<Process>(0, -1, -1, -1, 0, 0),
+        self(std::make_unique<Process>(0, -1, -1, -1, 0, 0),
         blocked(std::move(blocked))
     {
     }
 
     void run();
 
-    void push(std::shared_ptr<Process> process)
+    void push(std::unique_ptr<Process> process)
     {
         push_requests.push(std::move(process));
     }
@@ -33,15 +34,15 @@ private:
 
     CPU cpu;
 
-    Scheduler scheduler;
-    MemoryManager mManager;
+    std::unique_ptr<Scheduler> scheduler;
+    std::unique_ptr<MemoryManager> mManager;
 
-    std::queue<std::shared_ptr<Process> > push_requests;
-    std::queue<std::shared_ptr<Process> > blocked;
+    std::queue<std::unique_ptr<Process> > push_requests;
+    std::queue<std::unique_ptr<Process> > blocked;
 
     unsigned quantum;
     unsigned overload;
 
-    std::shared_ptr<Process> self;
+    std::unique_ptr<Process> self;
 };
 }

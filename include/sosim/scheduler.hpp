@@ -16,12 +16,12 @@ public:
     {
     }
 
-    void push(std::shared_ptr<Process> process)
+    void push(std::unique_ptr<Process> process)
     {
         this->ready.push(std::move(process));
     }
 
-    auto next() -> std::shared_ptr<Process>
+    auto next() -> std::unique_ptr<Process>
     {
         if(this->ready.empty())
             return nullptr;
@@ -36,13 +36,13 @@ public:
     }
 
 private:
-    virtual bool comparator(const std::shared_ptr<Process> &i,
-                            const std::shared_ptr<Process> &j)
+    virtual bool comparator(const std::unique_ptr<Process> &i,
+                            const std::unique_ptr<Process> &j)
     {
         return false;
     }
 
-    std::queue<std::shared_ptr<Process> > ready;
+    std::queue<std::unique_ptr<Process> > ready;
 };
 
 class NotPreemptive : public Scheduler
@@ -56,22 +56,22 @@ class FIFO : public NotPreemptive
 class SJF : public NotPreemptive
 {
 private:
-    bool comparator(const std::shared_ptr<Process> &i,
-                    const std::shared_ptr<Process> &j)
+    bool comparator(const std::unique_ptr<Process> &i,
+                    const std::unique_ptr<Process> &j) override
     {
         return i->execTime < j->execTime;
     }
 
-    std::priority_queue<std::shared_ptr<Process>,
-        std::vector<std::shared_ptr<Process> >,
-        std::function<bool(std::shared_ptr<Process>,
-            std::shared_ptr<Process>) > > ready(this->comparator);
+    std::priority_queue<std::unique_ptr<Process>,
+        std::vector<std::unique_ptr<Process> >,
+        std::function<bool(std::unique_ptr<Process>,
+            std::unique_ptr<Process>) > > ready(this->comparator);
 };
 
 class Preemptive : public Scheduler
 {
 public:
-    bool is_preemptive()
+    bool is_preemptive() override
     {
         return true;
     }
@@ -84,15 +84,15 @@ class RoundRobin : public Preemptive
 class EDF : public Preemptive
 {
 private:
-    bool comparator(const std::shared_ptr<Process> &i,
-                    const std::shared_ptr<Process> &j)
+    bool comparator(const std::unique_ptr<Process> &i,
+                    const std::unique_ptr<Process> &j) override
     {
         return i->deadline < j->deadline;
     }
 
-    std::priority_queue<std::shared_ptr<Process>,
-        std::vector<std::shared_ptr<Process> >,
-        std::function<bool(std::shared_ptr<Process>,
-            std::shared_ptr<Process>) > > ready(this->comparator);
+    std::priority_queue<std::unique_ptr<Process>,
+        std::vector<std::unique_ptr<Process> >,
+        std::function<bool(std::unique_ptr<Process>,
+            std::unique_ptr<Process>) > > ready(this->comparator);
 };
 }

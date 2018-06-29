@@ -2,7 +2,7 @@
 
 namespace sosim
 {
-auto MemoryManager::check(std::shared_ptr<Process> process) -> std::shared_ptr<Process>
+auto MemoryManager::check(std::unique_ptr<Process> process) -> std::unique_ptr<Process>
 {
     for(auto ref : process->page_refs)
     {
@@ -20,7 +20,7 @@ auto MemoryManager::check(std::shared_ptr<Process> process) -> std::shared_ptr<P
     return process;
 }
 
-auto MemoryManager::alloc(std::shared_ptr<Process> process) -> std::shared_ptr<Process>
+auto MemoryManager::alloc(std::unique_ptr<Process> process) -> std::unique_ptr<Process>
 {
     for(auto ref : process->page_refs)
     {

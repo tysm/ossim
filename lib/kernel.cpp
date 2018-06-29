@@ -39,7 +39,7 @@ void Kernel::run()
     }
 }
 
-void next()
+void Kernel::next()
 {
     // Looking for some really ready process
     auto process = scheduler.next();
