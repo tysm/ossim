@@ -8,6 +8,36 @@
 
 namespace sosim
 {
+class Comparator
+{
+public:
+    virtual bool operator() (const std::unique_ptr<Process> &i,
+                             const std::unique_ptr<Process> &j)
+    {
+        return false;
+    }
+};
+
+class ComparatorSJF : public Comparator
+{
+public:
+    bool operator() (const std::unique_ptr<Process> &i,
+                     const std::unique_ptr<Process> &j) override
+    {
+        return i->execTime < j->execTime;
+    }
+};
+
+class ComparatorEDF : public Comparator
+{
+public:
+    bool operator() (const std::unique_ptr<Process> &i,
+                     const std::unique_ptr<Process> &j) override
+    {
+        return i->deadline < j->deadline;
+    }
+};
+
 class Scheduler
 {
 public:
@@ -25,7 +55,7 @@ public:
     {
         if(this->ready.empty())
             return nullptr;
-        auto process = this->ready.front();
+        auto process = std::move(this->ready.front());
         this->ready.pop();
         return process;
     }
@@ -36,14 +66,8 @@ public:
     }
 
 private:
-    virtual bool comparator(const std::unique_ptr<Process> &i,
-                            const std::unique_ptr<Process> &j)
-    {
-        return false;
-    }
-
     std::queue<std::unique_ptr<Process> > ready;
-};
+};		
 
 class NotPreemptive : public Scheduler
 {
@@ -56,16 +80,9 @@ class FIFO : public NotPreemptive
 class SJF : public NotPreemptive
 {
 private:
-    bool comparator(const std::unique_ptr<Process> &i,
-                    const std::unique_ptr<Process> &j) override
-    {
-        return i->execTime < j->execTime;
-    }
-
     std::priority_queue<std::unique_ptr<Process>,
         std::vector<std::unique_ptr<Process> >,
-        std::function<bool(std::unique_ptr<Process>,
-            std::unique_ptr<Process>) > > ready(this->comparator);
+        ComparatorSJF> ready;
 };
 
 class Preemptive : public Scheduler
@@ -84,15 +101,8 @@ class RoundRobin : public Preemptive
 class EDF : public Preemptive
 {
 private:
-    bool comparator(const std::unique_ptr<Process> &i,
-                    const std::unique_ptr<Process> &j) override
-    {
-        return i->deadline < j->deadline;
-    }
-
     std::priority_queue<std::unique_ptr<Process>,
         std::vector<std::unique_ptr<Process> >,
-        std::function<bool(std::unique_ptr<Process>,
-            std::unique_ptr<Process>) > > ready(this->comparator);
+        ComparatorEDF> ready;
 };
 }

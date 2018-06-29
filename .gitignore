@@ -36,3 +36,6 @@
 
 
 # End of https://www.gitignore.io/api/c++
+
+# Simulator executable
+simulator

@@ -21,7 +21,7 @@ struct Process
                      unsigned quantum, unsigned overload, unsigned pid,
                      int nPages) :
         bornTime(bornTime), execTime(execTime), deadline(deadline),
-        quantum(quantum), pid(pid), page_refs(nPages, -1)
+        quantum(quantum), overload(overload), pid(pid), page_refs(nPages, -1)
     {
     }
 };

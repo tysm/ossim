@@ -30,7 +30,7 @@ public:
         }
     }
 
-    void push(std::unique_ptr<Process> process) :
+    void push(std::unique_ptr<Process> process)
     {
         this->process = std::move(process);
     }
@@ -43,9 +43,9 @@ public:
     CPUState state()
     {
         if(!process)
-            return Idle;
+            return CPUState::Idle;
         // If the pid is 0 (i.e. the kernel), then we are in overload state.
-        return !process->pid? Overload : Exec;
+        return !process->pid? CPUState::Overload : CPUState::Exec;
     }
 
 private:

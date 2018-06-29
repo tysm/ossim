@@ -14,11 +14,11 @@ class Kernel
 public:
     explicit Kernel(CPU cpu, std::unique_ptr<Scheduler> scheduler,
                     std::unique_ptr<MemoryManager> mManager,
-                    std::queue<std::unique_ptr<Process> > &blocked) :
+                    std::queue<std::unique_ptr<Process> > blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
         mManager(std::move(mManager)), push_requests(),
-        self(std::make_unique<Process>(0, -1, -1, -1, 0, 0),
-        blocked(std::move(blocked))
+        blocked(std::move(blocked)),
+        self(std::make_unique<Process>(0, -1, -1, -1, 0, 0, 0))
     {
     }
 
