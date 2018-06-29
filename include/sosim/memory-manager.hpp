@@ -1,5 +1,5 @@
 #pragma once
-#include <list>
+#include <queue>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -12,7 +12,7 @@ class MemoryManager
 public:
     explicit MemoryManager(unsigned shift_delay, int ram_pages,
                            int virtual_pages,
-                           std::list<shared_ptr<Process> > &blocked) :
+                           std::queue<std::shared_ptr<Process> > &blocked) :
         shift_delay(shift_delay), ram(ram_pages, 0), swap(),
         alloc_position(0), page_table(virtual_pages, {-1, false}),
         blocked(blocked)
@@ -35,8 +35,8 @@ private:
 
     int alloc_position;
 
-    std::vector<pair<int, bool> > page_table;
+    std::vector<std::pair<int, bool> > page_table;
 
-    std::list<std::shared_ptr<Process> > &blocked;
+    std::queue<std::shared_ptr<Process> > &blocked;
 };
 }

@@ -20,15 +20,14 @@ public:
     {
     }
 
-    auto run() -> std::shared_ptr<Process>
+    void run()
     {
         if(process)
         {
             process->execTime--;
             if(process->execTime == 0)
-                return process = nullptr;
+                process.reset();
         }
-        return process;
     }
 
     void push(std::shared_ptr<Process> process) :
@@ -36,7 +35,7 @@ public:
         this->process = std::move(process);
     }
 
-    auto drop() -> shared_ptr<Process>
+    auto drop() -> std::shared_ptr<Process>
     {
         return std::move(this->process);
     }

@@ -1,5 +1,6 @@
 #pragma once
-#include <list>
+#include <queue>
+#include <vector>
 #include <memory>
 #include <utility>
 #include <algorithm>
@@ -15,22 +16,17 @@ public:
     {
     }
 
-    void run()
-    {
-        std::stable_sort(ready.begin(), ready.end(), this->comparator);
-    }
-
     void push(std::shared_ptr<Process> process)
     {
-        ready.push_back(std::move(process));
+        this->ready.push(std::move(process));
     }
 
     auto next() -> std::shared_ptr<Process>
     {
-        if(ready.empty())
+        if(this->ready.empty())
             return nullptr;
-        auto process = ready.front();
-        ready.pop_front();
+        auto process = this->ready.front();
+        this->ready.pop();
         return process;
     }
 
@@ -46,7 +42,7 @@ private:
         return false;
     }
 
-    std::list<std::shared_ptr<Process> > ready;
+    std::queue<std::shared_ptr<Process> > ready;
 };
 
 class NotPreemptive : public Scheduler
@@ -65,6 +61,11 @@ private:
     {
         return i->execTime < j->execTime;
     }
+
+    std::priority_queue<std::shared_ptr<Process>,
+        std::vector<std::shared_ptr<Process> >,
+        std::function<bool(std::shared_ptr<Process>,
+            std::shared_ptr<Process>) > > ready(this->comparator);
 };
 
 class Preemptive : public Scheduler
@@ -88,5 +89,10 @@ private:
     {
         return i->deadline < j->deadline;
     }
+
+    std::priority_queue<std::shared_ptr<Process>,
+        std::vector<std::shared_ptr<Process> >,
+        std::function<bool(std::shared_ptr<Process>,
+            std::shared_ptr<Process>) > > ready(this->comparator);
 };
 }

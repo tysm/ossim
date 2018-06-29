@@ -1,5 +1,5 @@
 #pragma once
-#include <list>
+#include <queue>
 #include <memory>
 #include <utility>
 #include <sosim/commom.hpp>
@@ -13,10 +13,10 @@ class Kernel
 {
 public:
     explicit Kernel(CPU cpu, Scheduler scheduler, MemoryManager mManager,
-                    std::list<shared_ptr<Process> > &blocked) :
+                    std::queue<std::shared_ptr<Process> > &blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
         mManager(std::move(mManager)), push_requests(),
-        self(make_shared<Process>(0, -1, -1, -1, 0, 0),
+        self(std::make_shared<Process>(0, -1, -1, -1, 0, 0),
         blocked(std::move(blocked))
     {
     }
@@ -25,7 +25,7 @@ public:
 
     void push(std::shared_ptr<Process> process)
     {
-        push_requests.push_back(std::move(process));
+        push_requests.push(std::move(process));
     }
 
 private:
@@ -36,8 +36,8 @@ private:
     Scheduler scheduler;
     MemoryManager mManager;
 
-    std::list<std::shared_ptr<Process> > push_requests;
-    std::list<shared_ptr<Process> > blocked;
+    std::queue<std::shared_ptr<Process> > push_requests;
+    std::queue<std::shared_ptr<Process> > blocked;
 
     unsigned quantum;
     unsigned overload;

@@ -7,15 +7,14 @@ void Kernel::run()
     // Running the Memory Manager and perhaps unblocking some process
     if(auto process = mManager.run())
         scheduler.push(std::move(process));
-    
+
     // Inserting new processes
-    for(auto process : push_requests)
-        scheduler.push(std::move(process));
-    push_requests.clear();
-    
-    // Sorting ready processes by the scheduler
-    scheduler.run();
-    
+    while(!push_requests.empty())
+    {
+        scheduler.push(std::move(push_requests.front()));
+        push_requests.pop();
+    }
+
     if(cpu.state() == Idle)
         this->next();
     else if(scheduler.is_preemptive())
@@ -25,8 +24,11 @@ void Kernel::run()
         else if(overload)
         {
             overload--;
-            scheduler.push(cpu.drop());
-            cpu.push(std::move(self));
+            if(cpu.state() != Overload)
+            {
+                scheduler.push(cpu.drop());
+                cpu.push(std::move(self));
+            }
         }
         else
         {
