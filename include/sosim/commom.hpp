@@ -14,7 +14,7 @@ struct Process
 
     unsigned pid;
 
-    std::vector<int> page_refs;
+    std::vector<size_t> page_refs;
 
 
     explicit Process(unsigned bornTime, unsigned execTime, unsigned deadline,
