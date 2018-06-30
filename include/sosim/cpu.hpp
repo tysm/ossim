@@ -15,11 +15,6 @@ enum class CPUState
 class CPU
 {
 public:
-    explicit CPU() :
-        process()
-    {
-    }
-
     void run()
     {
         if(process)

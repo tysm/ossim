@@ -10,12 +10,12 @@ const T& min(const T &a, const T &b)
 
 auto MemoryManager::run() -> std::unique_ptr<Process>
 {
-    if(!blocked.empty())
+    if(!blocked->empty())
     {
         if(!delay_count)
             delay_count = shift_delay;
 
-        auto pid = blocked.front()->pid;
+        auto pid = blocked->front()->pid;
         auto &ref = *alloc_buffer.front().front();
 
         if(ref == size_t(-1))
@@ -41,8 +41,8 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
         delay_count--;
         if(!delay_count)
         {
-            auto process = std::move(blocked.front());
-            blocked.pop_front();
+            auto process = std::move(blocked->front());
+            blocked->pop_front();
             return process;
         }
     }
@@ -82,7 +82,7 @@ auto MemoryManager::check(std::unique_ptr<Process> process)
         }
     }
     if(block)
-        blocked.push_back(std::move(process));
+        blocked->push_back(std::move(process));
     return process;
 }
 
@@ -125,7 +125,7 @@ auto MemoryManager::alloc(std::unique_ptr<Process> process, size_t first_idx)
         }
     }
     if(block)
-        blocked.push_back(std::move(process));
+        blocked->push_back(std::move(process));
     return process;
 }
 }

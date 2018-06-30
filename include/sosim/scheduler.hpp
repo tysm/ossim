@@ -24,11 +24,6 @@ enum class SchedulerKind
 class Scheduler
 {
 public:
-    explicit Scheduler() :
-        ready()
-    {
-    }
-
     void push(std::unique_ptr<Process> process)
     {
         ready.push_back(std::move(process));

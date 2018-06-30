@@ -15,10 +15,9 @@ public:
     explicit Kernel(std::shared_ptr<CPU> cpu,
                     std::unique_ptr<Scheduler> scheduler,
                     std::unique_ptr<MemoryManager> mManager,
-                    std::list<std::unique_ptr<Process> > blocked) :
+                    shared_list<std::unique_ptr<Process> > blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
-        mManager(std::move(mManager)), push_requests(),
-        blocked(std::move(blocked)),
+        mManager(std::move(mManager)), blocked(std::move(blocked)),
         self(std::make_unique<Process>(0, -1, -1, -1, 0, 0, 0))
     {
     }
@@ -39,7 +38,7 @@ private:
     std::unique_ptr<MemoryManager> mManager;
 
     std::list<std::unique_ptr<Process> > push_requests;
-    std::list<std::unique_ptr<Process> > blocked;
+    shared_list<std::unique_ptr<Process> > blocked;
 
     unsigned quantum;
     unsigned overload;

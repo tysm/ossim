@@ -14,24 +14,27 @@ class FIFO_MM;
 class LRUComparator;
 class LRU;
 
+template <class T>
+const T& min(const T &a, const T &b);
+
+template <class T>
+using shared_list = std::shared_ptr<std::list<T> >;
+
 enum class MemoryManagerKind
 {
     FIFO_MM,
     LRU,
 };
 
-template <class T>
-const T& min(const T &a, const T &b);
-
 class MemoryManager
 {
 public:
     explicit MemoryManager(unsigned shift_delay, size_t ram_pages,
                            size_t virtual_pages,
-                           std::list<std::unique_ptr<Process> > &blocked) :
-        shift_delay(shift_delay), delay_count(0), swap(), virtual_position(0),
-        page_table(virtual_pages, {-1, false}), blocked(blocked),
-        alloc_buffer(), ram(ram_pages, 0)
+                           shared_list<std::unique_ptr<Process> > blocked) :
+        shift_delay(shift_delay), delay_count(0), virtual_position(0),
+        page_table(virtual_pages, {-1, false}), blocked(std::move(blocked)),
+        ram(ram_pages, 0)
     {
     }
 
@@ -58,7 +61,7 @@ private:
 
     std::vector<std::pair<int, bool> > page_table;
 
-    std::list<std::unique_ptr<Process> > &blocked;
+    shared_list<std::unique_ptr<Process> > blocked;
     std::list<std::list<size_t*> > alloc_buffer;
 
 protected:
@@ -69,8 +72,9 @@ class FIFO_MM : public MemoryManager
 {
 public:
     explicit FIFO_MM(unsigned shift_delay, int ram_pages, int virtual_pages,
-                     std::list<std::unique_ptr<Process> > &blocked) :
-        MemoryManager(shift_delay, ram_pages, virtual_pages, blocked),
+                     shared_list<std::unique_ptr<Process> > blocked) :
+        MemoryManager(shift_delay, ram_pages, virtual_pages,
+                      std::move(blocked)),
         alloc_position(0)
     {
     }
@@ -105,9 +109,10 @@ class LRU : public MemoryManager
 {
 public:
     explicit LRU(unsigned shift_delay, int ram_pages, int virtual_pages,
-                 std::list<std::unique_ptr<Process> > &blocked) :
-        MemoryManager(shift_delay, ram_pages, virtual_pages, blocked),
-        access_table(ram_pages, 0), current_access(1), alloc_position()
+                 shared_list<std::unique_ptr<Process> > blocked) :
+        MemoryManager(shift_delay, ram_pages, virtual_pages,
+                      std::move(blocked)),
+        access_table(ram_pages, 0), current_access(1)
     {
         for(auto it = access_table.begin(); it != access_table.end(); ++it)
         {
