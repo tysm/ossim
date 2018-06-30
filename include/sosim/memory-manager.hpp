@@ -9,21 +9,19 @@
 
 namespace sosim
 {
-template <class T>
-const T& min(const T &a, const T &b)
-{
-    return !(b < a)? a : b;
-}
+class MemoryManager;
+class FIFO_MM;
+class LRUComparator;
+class LRU;
 
-class LRUComparator
+enum class MemoryManagerKind
 {
-public:
-    bool operator() (const std::vector<unsigned>::iterator &i,
-                     const std::vector<unsigned>::iterator &j)
-    {
-        return *i < *j;
-    }
+    FIFO_MM,
+    LRU,
 };
+
+template <class T>
+const T& min(const T &a, const T &b);
 
 class MemoryManager
 {
@@ -91,6 +89,16 @@ private:
     }
 
     size_t alloc_position;
+};
+
+class LRUComparator
+{
+public:
+    bool operator() (const std::vector<unsigned>::iterator &i,
+                     const std::vector<unsigned>::iterator &j)
+    {
+        return *i < *j;
+    }
 };
 
 class LRU : public MemoryManager
