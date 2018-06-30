@@ -101,12 +101,12 @@ public:
         MemoryManager(shift_delay, ram_pages, virtual_pages, blocked),
         access_table(ram_pages, 0), current_access(1), alloc_position()
     {
-        for(std::vector<unsigned>::iterator it = access_table.begin();
-            it != access_table.end(); ++it)
+        for(auto it = access_table.begin(); it != access_table.end(); ++it)
         {
             alloc_position.push(it);
         }
     }
+
 private:
     void update_access_table(size_t ref) override
     {

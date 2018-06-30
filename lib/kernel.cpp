@@ -43,8 +43,13 @@ void Kernel::next()
 {
     // Looking for some really ready process
     auto process = scheduler->next();
-    while(process && !(process = mManager->check(std::move(process))))
-        process = scheduler->next();
+    while(process)
+    {
+        // Checking the process in memory
+        process = mManager->check(std::move(process));
+        if(!process)
+            process = scheduler->next();
+    }
 
     // If there is a ready process then push it on cpu
     if(process)
