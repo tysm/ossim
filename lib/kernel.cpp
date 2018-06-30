@@ -4,9 +4,20 @@ namespace sosim
 {
 void Kernel::run()
 {
-    // Running the Memory Manager and perhaps unblocking some process
-    if(auto process = mManager->run())
+    // Running the Memory Manager and maybe unblocking some process
+    if(auto process = memMng->run())
         scheduler->push(std::move(process));
+
+    // Looking for unblocked processes
+    while(!blocked.empty() && memMng->state() == MemoryManagerState::Free)
+    {
+        auto process = std::move(blocked.front());
+        if(!memMng->try_alloc(process->pid, process->page_refs, true))
+            memMng->push(std::move(process));
+        else
+            scheduler->push(std::move(process));
+        blocked.pop_front();
+    }
 
     // Inserting new processes
     while(!push_requests.empty())
@@ -15,6 +26,7 @@ void Kernel::run()
         push_requests.pop_front();
     }
 
+    // Trying to perform exchanges at CPU
     if(cpu->state() == CPUState::Idle)
         this->next();
     else if(scheduler->is_preemptive())
@@ -41,25 +53,25 @@ void Kernel::run()
 
 void Kernel::next()
 {
-    // Looking for some really ready process
-    auto process = scheduler->next();
-    while(process)
+    while(cpu->state() == CPUState::Idle)
     {
-        // Checking the process in memory
-        process = mManager->check(std::move(process));
-        if(!process)
-            process = scheduler->next();
-    }
+        auto process = scheduler->next();
 
-    // If there is a ready process then push it on cpu
-    if(process)
-    {
-        if(scheduler->is_preemptive())
+        if(!process)
+            return;
+
+        // Checking if the process is allocated
+        if(memMng->try_alloc(process->pid, process->page_refs, false))
         {
-            quantum = process->quantum;
-            overload = process->overload;
+            if(scheduler->is_preemptive())
+            {
+                quantum = process->quantum;
+                overload = process->overload;
+            }
+            cpu->push(std::move(process));
         }
-        cpu->push(std::move(process));
+        else
+            blocked.push_back(std::move(process));
     }
 }
 }

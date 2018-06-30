@@ -17,8 +17,11 @@ class LRU;
 template <class T>
 const T& min(const T &a, const T &b);
 
-template <class T>
-using shared_list = std::shared_ptr<std::list<T> >;
+enum class MemoryManagerState
+{
+    Busy,
+    Free,
+};
 
 enum class MemoryManagerKind
 {
@@ -30,39 +33,43 @@ class MemoryManager
 {
 public:
     explicit MemoryManager(unsigned shift_delay, size_t ram_pages,
-                           size_t virtual_pages,
-                           shared_list<std::unique_ptr<Process> > blocked) :
-        shift_delay(shift_delay), delay_count(0), virtual_position(0),
-        page_table(virtual_pages, {-1, false}), blocked(std::move(blocked)),
-        ram(ram_pages, 0)
+                           size_t virtual_pages) :
+        shift_delay(shift_delay), next_virtual_position(0),
+        page_table(virtual_pages, {-1, false}), ram(ram_pages, 0)
     {
     }
 
     auto run() -> std::unique_ptr<Process>;
 
-    auto check(std::unique_ptr<Process> process) -> std::unique_ptr<Process>;
+    void push(std::unique_ptr<Process> process);
+
+    bool try_alloc(unsigned pid,
+                   std::shared_ptr<std::vector<size_t> > page_refs,
+                   bool checking);
+
+    auto state() -> MemoryManagerState
+    {
+        return process? MemoryManagerState::Busy : MemoryManagerState::Free;
+    }
 
 private:
-    auto alloc(std::unique_ptr<Process> process, size_t first_idx)
-            -> std::unique_ptr<Process>;
+    bool alloc(unsigned pid, size_t &ref, bool blocked_process);
 
-    virtual void update_access_table(size_t ref) = 0;
+    virtual void update_access_table(size_t alloc_position) = 0;
 
     virtual auto next_alloc_position() -> size_t = 0;
 
     virtual void regress_alloc_position() = 0;
 
     unsigned shift_delay;
-    unsigned delay_count;
+    unsigned delay;
 
+    size_t next_virtual_position;
+    std::vector<std::pair<int, bool> > page_table;
     std::multiset<unsigned> swap;
 
-    size_t virtual_position;
-
-    std::vector<std::pair<int, bool> > page_table;
-
-    shared_list<std::unique_ptr<Process> > blocked;
-    std::list<std::list<size_t*> > alloc_buffer;
+    std::unique_ptr<Process> process;
+    std::list<size_t*> alloc_buffer;
 
 protected:
     std::vector<unsigned> ram;
@@ -71,10 +78,8 @@ protected:
 class FIFO_MM : public MemoryManager
 {
 public:
-    explicit FIFO_MM(unsigned shift_delay, int ram_pages, int virtual_pages,
-                     shared_list<std::unique_ptr<Process> > blocked) :
-        MemoryManager(shift_delay, ram_pages, virtual_pages,
-                      std::move(blocked)),
+    explicit FIFO_MM(unsigned shift_delay, int ram_pages, int virtual_pages) :
+        MemoryManager(shift_delay, ram_pages, virtual_pages),
         alloc_position(0)
     {
     }
@@ -108,10 +113,8 @@ public:
 class LRU : public MemoryManager
 {
 public:
-    explicit LRU(unsigned shift_delay, int ram_pages, int virtual_pages,
-                 shared_list<std::unique_ptr<Process> > blocked) :
-        MemoryManager(shift_delay, ram_pages, virtual_pages,
-                      std::move(blocked)),
+    explicit LRU(unsigned shift_delay, int ram_pages, int virtual_pages) :
+        MemoryManager(shift_delay, ram_pages, virtual_pages),
         access_table(ram_pages, 0), current_access(1)
     {
         for(auto it = access_table.begin(); it != access_table.end(); ++it)
@@ -121,9 +124,9 @@ public:
     }
 
 private:
-    void update_access_table(size_t ref) override
+    void update_access_table(size_t alloc_position) override
     {
-        access_table[ref] = current_access++;
+        access_table[alloc_position] = current_access++;
     }
 
     auto next_alloc_position() -> size_t override

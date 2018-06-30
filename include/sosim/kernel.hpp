@@ -14,10 +14,10 @@ class Kernel
 public:
     explicit Kernel(std::shared_ptr<CPU> cpu,
                     std::unique_ptr<Scheduler> scheduler,
-                    std::unique_ptr<MemoryManager> mManager,
-                    shared_list<std::unique_ptr<Process> > blocked) :
+                    std::unique_ptr<MemoryManager> memMng,
+                    std::list<std::unique_ptr<Process> > blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
-        mManager(std::move(mManager)), blocked(std::move(blocked)),
+        memMng(std::move(memMng)), blocked(std::move(blocked)),
         self(std::make_unique<Process>(0, -1, -1, -1, 0, 0, 0))
     {
     }
@@ -31,7 +31,11 @@ public:
 
     auto remaining_processes() -> size_t
     {
-        return scheduler->remaining_processes() + blocked->size();
+        size_t remaining = 0;
+        remaining += scheduler->remaining_processes();
+        remaining += blocked.size();
+        remaining += memMng->state() == MemoryManagerState::Busy? 1 : 0;
+        return remaining;
     }
 
 private:
@@ -40,10 +44,10 @@ private:
     std::shared_ptr<CPU> cpu;
 
     std::unique_ptr<Scheduler> scheduler;
-    std::unique_ptr<MemoryManager> mManager;
+    std::unique_ptr<MemoryManager> memMng;
 
     std::list<std::unique_ptr<Process> > push_requests;
-    shared_list<std::unique_ptr<Process> > blocked;
+    std::list<std::unique_ptr<Process> > blocked;
 
     unsigned quantum;
     unsigned overload;

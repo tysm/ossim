@@ -10,122 +10,87 @@ const T& min(const T &a, const T &b)
 
 auto MemoryManager::run() -> std::unique_ptr<Process>
 {
-    if(!blocked->empty())
+    if(process)
     {
-        if(!delay_count)
-            delay_count = shift_delay;
+        delay--;
 
-        auto pid = blocked->front()->pid;
-        auto &ref = *alloc_buffer.front().front();
-
-        if(ref == size_t(-1))
+        if(delay%shift_delay == 0)
         {
-            if(virtual_position != page_table.size())
-            {
-                ref = virtual_position;
-                virtual_position++;
-            }
-            // TODO else crash
+            alloc(process->pid, *alloc_buffer.front(), true);
+            alloc_buffer.pop_front();
         }
-        else
-            swap.erase(pid);
 
-        auto alloc_position = next_alloc_position();
-        swap.insert(ram[alloc_position]);
-
-        ram[alloc_position] = pid;
-        // New access successfully
-        update_access_table(ref);
-        page_table[ref] = {alloc_position, true};
-
-        delay_count--;
-        if(!delay_count)
-        {
-            auto process = std::move(blocked->front());
-            blocked->pop_front();
-            return process;
-        }
+        if(!delay)
+            return std::move(process);
     }
     return nullptr;
 }
 
-auto MemoryManager::check(std::unique_ptr<Process> process)
-        -> std::unique_ptr<Process>
+void MemoryManager::push(std::unique_ptr<Process> process)
 {
-    bool block = false;
-    for(size_t i = 0; i < process->page_refs.size(); ++i)
+    for(size_t i = 0; i < process->page_refs->size(); ++i)
     {
-        auto &ref = process->page_refs[i];
-        if(!block)
-        {
-            // Unallocated process
-            if(ref == size_t(-1))
-                return alloc(std::move(process), i);
-
-            // Page fault
-            else if(!page_table[ref].second)
-            {
-                block = true;
-                alloc_buffer.push_back(std::list<size_t*>());
-                alloc_buffer.back().push_back(&ref);
-            }
-
-            // Re-access successfully
-            else
-            {
-                update_access_table(ref);
-            }
-        }
-        else
-        {
-            alloc_buffer.back().push_back(&ref);
-        }
+        auto &ref = (*process->page_refs)[i];
+        // Unallocated process or page fault
+        if(ref == size_t(-1) || !page_table[ref].second)
+            alloc_buffer.push_back(&ref);
     }
-    if(block)
-        blocked->push_back(std::move(process));
-    return process;
+    delay = shift_delay*alloc_buffer.size();
+    this->process = std::move(process);
 }
 
-auto MemoryManager::alloc(std::unique_ptr<Process> process, size_t first_idx)
-        -> std::unique_ptr<Process>
+bool MemoryManager::try_alloc(unsigned pid,
+                              std::shared_ptr<std::vector<size_t> > page_refs,
+                              bool checking)
 {
-    bool block = false;
-    for(size_t i = first_idx; i < process->page_refs.size(); ++i)
+    for(size_t i = 0; i < page_refs->size(); ++i)
     {
-        auto &ref = process->page_refs[i];
-        if(!block)
-        {
-            auto alloc_position = next_alloc_position();
-            // There is nothing allocated
-            if(!ram[alloc_position])
-            {
-                if(virtual_position != page_table.size())
-                {
-                    ref = virtual_position;
-                    virtual_position++;
+        auto &ref = (*page_refs)[i];
+        // Unallocated process
+        if(ref == size_t(-1) && !alloc(pid, ref, false))
+            return false;
 
-                    ram[alloc_position] = process->pid;
-                    // New-access sucessfully
-                    update_access_table(ref);
-                    page_table[ref] = {alloc_position, true};
-                }
-                // TODO else crash!
-            }
-            else
-            {
-                regress_alloc_position();
-                block = true;
-                alloc_buffer.push_back(std::list<size_t*>());
-                alloc_buffer.back().push_back(&ref);
-            }
-        }
-        else
+        // Page fault
+        else if(!page_table[ref].second)
+            return false;
+
+        // Re-access successfully
+        else if(!checking)
+            update_access_table(page_table[ref].first);
+    }
+    return true;
+}
+
+bool MemoryManager::alloc(unsigned pid, size_t &ref, bool blocked_process)
+{
+    auto alloc_position = next_alloc_position();
+    // Unallocated process
+    if(ref == size_t(-1))
+    {
+        if(next_virtual_position != page_table.size())
+            ref = next_virtual_position++;
+        // TODO else crash
+
+        // There's not empty space, can't alloc
+        if(!blocked_process && ram[alloc_position] != 0)
         {
-            alloc_buffer.back().push_back(&ref);
+            regress_alloc_position();
+            return false;
         }
     }
-    if(block)
-        blocked->push_back(std::move(process));
-    return process;
+
+    // Process allocated but your page is in swap
+    else if(blocked_process)
+        swap.erase(pid);
+
+    // Allocating in ram
+    if(ram[alloc_position] != 0)
+        swap.insert(ram[alloc_position]);
+    ram[alloc_position] = pid;
+    page_table[ref] = {alloc_position, true};
+
+    // New access successfully
+    update_access_table(alloc_position);
+    return true;
 }
 }

@@ -4,7 +4,7 @@ using namespace sosim;
 
 int main()
 {
-    auto simulator = std::make_unique<Simulator>(Simulator());
+    auto simulator = std::make_unique<Simulator>();
 
     // TODO input and display
 
