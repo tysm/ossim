@@ -29,6 +29,11 @@ public:
         push_requests.push_back(std::move(process));
     }
 
+    auto remaining_processes() -> size_t
+    {
+        return scheduler->remaining_processes() + blocked->size();
+    }
+
 private:
     void next();
 

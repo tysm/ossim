@@ -11,7 +11,6 @@ namespace sosim
 {
 void Simulator::run()
 {
-    cpu->run();
     while(!buffer.empty() && buffer.front()->bornTime <= current_time)
     {
         kernel->push(std::move(buffer.front()));
@@ -23,6 +22,8 @@ void Simulator::run()
 void Simulator::time()
 {
     sleep(delay);
-    current_time += delay;
+    current_time++;
+    if(auto process = cpu->run())
+        runtime += current_time - process->bornTime;
 }
 }

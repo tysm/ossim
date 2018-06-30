@@ -46,6 +46,11 @@ public:
         return false;
     }
 
+    auto remaining_processes() -> size_t
+    {
+        return ready.size();
+    }
+
 private:
     virtual bool comparator(const std::unique_ptr<Process> &i,
                             const std::unique_ptr<Process> &j)

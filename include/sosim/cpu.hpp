@@ -15,14 +15,15 @@ enum class CPUState
 class CPU
 {
 public:
-    void run()
+    auto run() -> std::unique_ptr<Process>
     {
         if(process)
         {
             process->execTime--;
             if(process->execTime == 0)
-                process.reset();
+                return std::move(process);
         }
+        return nullptr;
     }
 
     void push(std::unique_ptr<Process> process)
