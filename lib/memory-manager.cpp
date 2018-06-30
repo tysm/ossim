@@ -9,8 +9,8 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
         if(!delay_count)
             delay_count = shift_delay;
 
-        unsigned pid = blocked.front()->pid;
-        size_t &ref = *alloc_buffer.front().front();
+        auto pid = blocked.front()->pid;
+        auto &ref = *alloc_buffer.front().front();
 
         if(ref == size_t(-1))
         {
@@ -24,11 +24,13 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
         else
             swap.erase(pid);
 
+        auto alloc_position = next_alloc_position();
         swap.insert(ram[alloc_position]);
 
         ram[alloc_position] = pid;
+        // New access successfully
+        update_access_table(ref);
         page_table[ref] = {alloc_position, true};
-        update_alloc_position();
 
         delay_count--;
         if(!delay_count)
@@ -47,7 +49,7 @@ auto MemoryManager::check(std::unique_ptr<Process> process)
     bool block = false;
     for(size_t i = 0; i < process->page_refs.size(); ++i)
     {
-        size_t &ref = process->page_refs[i];
+        auto &ref = process->page_refs[i];
         if(!block)
         {
             // Unallocated process
@@ -60,6 +62,12 @@ auto MemoryManager::check(std::unique_ptr<Process> process)
                 block = true;
                 alloc_buffer.push_back(std::list<size_t*>());
                 alloc_buffer.back().push_back(&ref);
+            }
+
+            // Re-access successfully
+            else
+            {
+                update_access_table(ref);
             }
         }
         else
@@ -78,9 +86,10 @@ auto MemoryManager::alloc(std::unique_ptr<Process> process, size_t first_idx)
     bool block = false;
     for(size_t i = first_idx; i < process->page_refs.size(); ++i)
     {
-        size_t &ref = process->page_refs[i];
+        auto &ref = process->page_refs[i];
         if(!block)
         {
+            auto alloc_position = next_alloc_position();
             // There is nothing allocated
             if(!ram[alloc_position])
             {
@@ -90,13 +99,15 @@ auto MemoryManager::alloc(std::unique_ptr<Process> process, size_t first_idx)
                     virtual_position++;
 
                     ram[alloc_position] = process->pid;
+                    // New-access sucessfully
+                    update_access_table(ref);
                     page_table[ref] = {alloc_position, true};
-                    update_alloc_position();
                 }
                 // TODO else crash!
             }
             else
             {
+                regress_alloc_position();
                 block = true;
                 alloc_buffer.push_back(std::list<size_t*>());
                 alloc_buffer.back().push_back(&ref);

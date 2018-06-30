@@ -19,7 +19,7 @@ struct Process
 
     explicit Process(unsigned bornTime, unsigned execTime, unsigned deadline,
                      unsigned quantum, unsigned overload, unsigned pid,
-                     int nPages) :
+                     size_t nPages) :
         bornTime(bornTime), execTime(execTime), deadline(deadline),
         quantum(quantum), overload(overload), pid(pid), page_refs(nPages, -1)
     {
