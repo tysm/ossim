@@ -51,7 +51,7 @@ class NotPreemptive : public Scheduler
 {
 };
 
-class FIFO : public NotPreemptive
+class FIFO_S : public NotPreemptive
 {
 };
 
