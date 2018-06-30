@@ -15,7 +15,7 @@ void Kernel::run()
         push_requests.pop_front();
     }
 
-    if(cpu.state() == CPUState::Idle)
+    if(cpu->state() == CPUState::Idle)
         this->next();
     else if(scheduler->is_preemptive())
     {
@@ -24,15 +24,15 @@ void Kernel::run()
         else if(overload)
         {
             overload--;
-            if(cpu.state() != CPUState::Overload)
+            if(cpu->state() != CPUState::Overload)
             {
-                scheduler->push(cpu.drop());
-                cpu.push(std::move(self));
+                scheduler->push(cpu->drop());
+                cpu->push(std::move(self));
             }
         }
         else
         {
-            if(auto process = cpu.drop())
+            if(auto process = cpu->drop())
                 self = std::move(process);
             this->next();
         }
@@ -59,7 +59,7 @@ void Kernel::next()
             quantum = process->quantum;
             overload = process->overload;
         }
-        cpu.push(std::move(process));
+        cpu->push(std::move(process));
     }
 }
 }

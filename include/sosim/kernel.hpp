@@ -12,7 +12,8 @@ namespace sosim
 class Kernel
 {
 public:
-    explicit Kernel(CPU cpu, std::unique_ptr<Scheduler> scheduler,
+    explicit Kernel(std::shared_ptr<CPU> cpu,
+                    std::unique_ptr<Scheduler> scheduler,
                     std::unique_ptr<MemoryManager> mManager,
                     std::list<std::unique_ptr<Process> > blocked) :
         cpu(std::move(cpu)), scheduler(std::move(scheduler)),
@@ -32,7 +33,7 @@ public:
 private:
     void next();
 
-    CPU cpu;
+    std::shared_ptr<CPU> cpu;
 
     std::unique_ptr<Scheduler> scheduler;
     std::unique_ptr<MemoryManager> mManager;
