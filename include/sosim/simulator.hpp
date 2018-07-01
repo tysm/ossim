@@ -4,6 +4,8 @@
 #include <utility>
 #include <sosim/commom.hpp>
 #include <sosim/cpu.hpp>
+#include <sosim/scheduler.hpp>
+#include <sosim/memory-manager.hpp>
 #include <sosim/kernel.hpp>
 
 namespace sosim
@@ -17,6 +19,13 @@ public:
 
     void time();
 
+    auto runtime_per_process() -> long double
+    {
+        if(auto conclued = processes - remaining_processes())
+            return runtime/conclued;
+        return 0;
+    }
+
     auto cpu_state() -> CPUState
     {
         return cpu->state();
@@ -27,11 +36,23 @@ public:
         return kernel->remaining_processes();
     }
 
-    auto runtime_per_process() -> long double
+    void set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
+                    unsigned shift_delay, size_t ram_pages,
+                    size_t virtual_pages);
+
+    void set_processes(size_t processes)
     {
-        if(auto conclued = processes - remaining_processes())
-            return runtime/conclued;
-        return 0;
+        this->processes = processes;
+    }
+
+    void push(unsigned bornTime, unsigned execTime, unsigned deadline,
+              unsigned quantum, unsigned overload, unsigned pid,
+              size_t nPages)
+    {
+        auto process = std::make_unique<Process>(bornTime, execTime, deadline,
+                                                 quantum, overload, pid,
+                                                 nPages);
+        buffer.push_back(std::move(process));
     }
 
 private:

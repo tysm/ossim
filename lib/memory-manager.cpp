@@ -2,12 +2,6 @@
 
 namespace sosim
 {
-template <class T>
-const T& min(const T &a, const T &b)
-{
-    return !(b < a)? a : b;
-}
-
 auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)

@@ -15,7 +15,10 @@ class LRUComparator;
 class LRU;
 
 template <class T>
-const T& min(const T &a, const T &b);
+const T& min(const T &a, const T &b)
+{
+    return !(b < a)? a : b;
+}
 
 enum class MemoryManagerState
 {
@@ -55,11 +58,15 @@ public:
 private:
     bool alloc(unsigned pid, size_t &ref, bool blocked_process);
 
-    virtual void update_access_table(size_t alloc_position) = 0;
+    virtual void update_access_table(size_t alloc_position)
+    {
+    }
 
     virtual auto next_alloc_position() -> size_t = 0;
 
-    virtual void regress_alloc_position() = 0;
+    virtual void regress_alloc_position()
+    {
+    }
 
     unsigned shift_delay;
     unsigned delay;
@@ -78,7 +85,8 @@ protected:
 class FIFO_MM : public MemoryManager
 {
 public:
-    explicit FIFO_MM(unsigned shift_delay, int ram_pages, int virtual_pages) :
+    explicit FIFO_MM(unsigned shift_delay, size_t ram_pages,
+                     size_t virtual_pages) :
         MemoryManager(shift_delay, ram_pages, virtual_pages),
         alloc_position(0)
     {
@@ -113,7 +121,8 @@ public:
 class LRU : public MemoryManager
 {
 public:
-    explicit LRU(unsigned shift_delay, int ram_pages, int virtual_pages) :
+    explicit LRU(unsigned shift_delay, size_t ram_pages,
+                 size_t virtual_pages) :
         MemoryManager(shift_delay, ram_pages, virtual_pages),
         access_table(ram_pages, 0), current_access(1)
     {
