@@ -32,6 +32,7 @@ public:
     {
         size_t remaining = 0;
         remaining += scheduler->remaining_processes();
+        remaining += cpu->state() == CPUState::Exec? 1 : 0;
         remaining += blocked.size();
         remaining += memMng->state() == MemoryManagerState::Busy? 1 : 0;
         return remaining;

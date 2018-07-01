@@ -9,13 +9,13 @@ int main()
 // {
     auto simulator = std::make_unique<Simulator>();
 // TODO input display -> simulator
-    while(simulator->cpu_state() != CPUState::Idle &&
-          simulator->remaining_processes() != 0)
+    do
     {
         simulator->run();
 // TODO simulator -> output display
         simulator->time();
-    }
+    } while(simulator->cpu_state() != CPUState::Idle ||
+            simulator->remaining_processes() != 0);
 // TODO wait for end display
 // }
     return 0;

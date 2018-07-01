@@ -7,12 +7,6 @@
 
 namespace sosim
 {
-class Scheduler;
-class FIFO_S;
-class SJF;
-class RoundRobin;
-class EDF;
-
 enum class SchedulerKind
 {
     FIFO_S,
