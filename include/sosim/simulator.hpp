@@ -13,7 +13,9 @@ namespace sosim
 class Simulator
 {
 public:
-    // TODO input
+    explicit Simulator() : current_time(0), runtime(0)
+    {
+    }
 
     void run();
 
@@ -43,6 +45,11 @@ public:
     void set_processes(size_t processes)
     {
         this->processes = processes;
+    }
+
+    void set_delay(unsigned delay)
+    {
+        this->delay = delay;
     }
 
     void push(unsigned bornTime, unsigned execTime, unsigned deadline,
