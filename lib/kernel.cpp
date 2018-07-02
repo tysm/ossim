@@ -65,7 +65,7 @@ void Kernel::next()
         {
             if(scheduler->is_preemptive())
             {
-                quantum = process->quantum;
+                quantum = process->quantum - 1;
                 overload = process->overload;
             }
             cpu->push(std::move(process));
