@@ -29,7 +29,7 @@ void MemoryManager::push(std::unique_ptr<Process> process)
         if(ref == size_t(-1) || !page_table[ref].second)
             alloc_buffer.push_back(&ref);
     }
-    delay = shift_delay*alloc_buffer.size();
+    delay = shift_delay*alloc_buffer.size() - 1;
     this->process = std::move(process);
 }
 
