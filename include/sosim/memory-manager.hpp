@@ -1,5 +1,4 @@
 #pragma once
-#include <set>
 #include <list>
 #include <queue>
 #include <vector>
@@ -50,13 +49,14 @@ public:
         return process? MemoryManagerState::Busy : MemoryManagerState::Free;
     }
 
-    void dealloc()
+    void dealloc(bool just_flush)
     {
         if(refs_in_use)
         {
-            for(auto ref : *refs_in_use)
+            if(!just_flush)
             {
-                page_table[ref] = {-1, false};
+                for(auto ref : *refs_in_use)
+                    page_table[ref] = {-1, false};
             }
             refs_in_use.reset();
         }
@@ -96,7 +96,7 @@ private:
     unsigned shift_delay;
     unsigned delay;
 
-    std::multiset<unsigned> swap;
+    std::vector<unsigned> swap;
 
     std::unique_ptr<Process> process;
     std::list<size_t*> alloc_buffer;
@@ -113,7 +113,7 @@ protected:
         {
             for(auto ref : *refs_in_use)
             {
-                if(ref == alloc_position)
+                if(page_table[ref].first == alloc_position)
                     return false;
             }
         }

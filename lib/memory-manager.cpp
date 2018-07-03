@@ -6,6 +6,13 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)
     {
+        while(delay != 1 && *alloc_buffer.front() == size_t(-1) &&
+              alloc(process->pid, *alloc_buffer.front(), false))
+        {
+            delay--;
+            alloc_buffer.pop_front();
+        }
+
         delay--;
 
         if(delay%shift_delay == 0)
@@ -29,7 +36,7 @@ void MemoryManager::push(std::unique_ptr<Process> process)
         if(ref == size_t(-1) || !page_table[ref].second)
             alloc_buffer.push_back(&ref);
     }
-    delay = shift_delay*alloc_buffer.size() - 1;
+    delay = shift_delay*alloc_buffer.size();
     this->process = std::move(process);
 }
 
@@ -56,7 +63,7 @@ bool MemoryManager::try_alloc(unsigned pid,
     return true;
 }
 
-bool MemoryManager::alloc(unsigned pid, size_t &ref, bool blocked_process)
+bool MemoryManager::alloc(unsigned pid, size_t &ref, bool force_alloc)
 {
     auto alloc_position = this->alloc_position();
     auto used_ref = was_allocated(alloc_position);
@@ -64,7 +71,7 @@ bool MemoryManager::alloc(unsigned pid, size_t &ref, bool blocked_process)
     if(ref == size_t(-1))
     {
         // There's not empty space, can't alloc
-        if(!blocked_process && used_ref != size_t(-1))
+        if(!force_alloc && used_ref != size_t(-1))
         {
             regress_alloc_position();
             return false;
@@ -73,14 +80,19 @@ bool MemoryManager::alloc(unsigned pid, size_t &ref, bool blocked_process)
     }
 
     // Process allocated but its page is in swap
-    else if(blocked_process)
-        swap.erase(pid);
+    else
+    {
+        auto it = swap.begin();
+        while(*it != pid)
+            it++;
+        swap.erase(it);
+    }
 
     // Allocating in ram
     if(used_ref != size_t(-1))
     {
         page_table[used_ref].second = false;
-        swap.insert(ram[alloc_position]);
+        swap.push_back(ram[alloc_position]);
     }
     ram[alloc_position] = pid;
     page_table[ref] = {alloc_position, true};

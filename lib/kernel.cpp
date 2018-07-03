@@ -6,7 +6,7 @@ void Kernel::run()
 {
     // Dealloc the last process
     if(cpu->state() == CPUState::Idle)
-        memMng->dealloc();
+        memMng->dealloc(false);
 
     // Running the Memory Manager and maybe unblocking some process
     if(auto process = memMng->run())
@@ -43,6 +43,7 @@ void Kernel::run()
             if(cpu->state() != CPUState::Overload)
             {
                 scheduler->push(cpu->drop());
+                memMng->dealloc(true);
                 cpu->push(std::move(self));
             }
         }
@@ -75,7 +76,12 @@ void Kernel::next()
             cpu->push(std::move(process));
         }
         else
-            blocked.push_back(std::move(process));
+        {
+            if(memMng->state() == MemoryManagerState::Free)
+                memMng->push(std::move(process));
+            else
+                blocked.push_back(std::move(process));
+        }
     }
 }
 }
