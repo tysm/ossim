@@ -39,8 +39,8 @@ public:
     }
 
     void set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
-                    unsigned shift_delay, size_t ram_pages,
-                    size_t virtual_pages);
+                    unsigned shift_delay, size_t virtual_pages,
+                    size_t ram_pages);
 
     void set_processes(size_t processes)
     {

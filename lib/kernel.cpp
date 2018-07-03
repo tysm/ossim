@@ -4,6 +4,10 @@ namespace sosim
 {
 void Kernel::run()
 {
+    // Dealloc the last process
+    if(cpu->state() == CPUState::Idle)
+        memMng->dealloc();
+
     // Running the Memory Manager and maybe unblocking some process
     if(auto process = memMng->run())
         scheduler->push(std::move(process));

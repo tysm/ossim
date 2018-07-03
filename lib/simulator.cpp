@@ -27,8 +27,8 @@ void Simulator::time()
         runtime += current_time - process->bornTime;
 }
 void Simulator::set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
-                           unsigned shift_delay, size_t ram_pages,
-                           size_t virtual_pages)
+                           unsigned shift_delay, size_t virtual_pages,
+                           size_t ram_pages)
 {
     cpu = std::make_shared<CPU>();
 
@@ -55,12 +55,12 @@ void Simulator::set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
     switch(mmKind)
     {
         case MemoryManagerKind::FIFO_MM:
-            memMng = std::make_unique<FIFO_MM>(shift_delay, ram_pages,
-                                               virtual_pages);
+            memMng = std::make_unique<FIFO_MM>(shift_delay, virtual_pages,
+                                               ram_pages);
             break;
         case MemoryManagerKind::LRU:
-            memMng = std::make_unique<LRU>(shift_delay, ram_pages,
-                                           virtual_pages);
+            memMng = std::make_unique<LRU>(shift_delay, virtual_pages,
+                                           ram_pages);
             break;
         default:
             break;

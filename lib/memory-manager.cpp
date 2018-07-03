@@ -50,7 +50,7 @@ bool MemoryManager::try_alloc(unsigned pid,
 
         // Re-access successfully
         else if(!checking)
-            update_access_table(page_table[ref].first);
+            make_updates(ref, page_table[ref].first);
     }
     refs_in_use = std::move(page_refs);
     return true;
@@ -58,34 +58,35 @@ bool MemoryManager::try_alloc(unsigned pid,
 
 bool MemoryManager::alloc(unsigned pid, size_t &ref, bool blocked_process)
 {
-    auto alloc_position = next_alloc_position();
+    auto alloc_position = this->alloc_position();
+    auto used_ref = was_allocated(alloc_position);
     // Unallocated process
     if(ref == size_t(-1))
     {
-        if(next_virtual_position != page_table.size())
-            ref = next_virtual_position++;
-        // TODO else crash
-
         // There's not empty space, can't alloc
-        if(!blocked_process && ram[alloc_position] != 0)
+        if(!blocked_process && used_ref != size_t(-1))
         {
             regress_alloc_position();
             return false;
         }
+        ref = virtual_position();
     }
 
-    // Process allocated but your page is in swap
+    // Process allocated but its page is in swap
     else if(blocked_process)
         swap.erase(pid);
 
     // Allocating in ram
-    if(ram[alloc_position] != 0)
+    if(used_ref != size_t(-1))
+    {
+        page_table[used_ref].second = false;
         swap.insert(ram[alloc_position]);
+    }
     ram[alloc_position] = pid;
     page_table[ref] = {alloc_position, true};
 
     // New access successfully
-    update_access_table(alloc_position);
+    make_updates(ref, alloc_position);
     return true;
 }
 }
