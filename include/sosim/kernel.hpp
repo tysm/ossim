@@ -14,10 +14,11 @@ class Kernel
 public:
     explicit Kernel(std::shared_ptr<CPU> cpu,
                     std::unique_ptr<Scheduler> scheduler,
+                    unsigned quantum, unsigned overload,
                     std::unique_ptr<MemoryManager> memMng) :
-        cpu(std::move(cpu)), scheduler(std::move(scheduler)),
-        memMng(std::move(memMng)),
-        self(std::make_unique<Process>(0, -1, -1, -1, 0, 0, 0))
+        cpu(std::move(cpu)), scheduler(std::move(scheduler)), quantum(quantum),
+        overload(overload), memMng(std::move(memMng)),
+        self(std::make_unique<Process>(0, -1, -1, 0, 0))
     {
     }
 
@@ -44,13 +45,16 @@ private:
     std::shared_ptr<CPU> cpu;
 
     std::unique_ptr<Scheduler> scheduler;
+
+    unsigned quantum;
+    unsigned overload;
+    unsigned quantum_counter;
+    unsigned overload_counter;
+
     std::unique_ptr<MemoryManager> memMng;
 
     std::list<std::unique_ptr<Process> > push_requests;
     std::list<std::unique_ptr<Process> > blocked;
-
-    unsigned quantum;
-    unsigned overload;
 
     std::unique_ptr<Process> self;
 };

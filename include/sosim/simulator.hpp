@@ -38,9 +38,9 @@ public:
         return kernel->remaining_processes();
     }
 
-    void set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
-                    unsigned shift_delay, size_t virtual_pages,
-                    size_t ram_pages);
+    void set_kernel(SchedulerKind sKind, unsigned quantum, unsigned overload,
+                    MemoryManagerKind mmKind, unsigned shift_delay,
+                    size_t virtual_pages, size_t ram_pages);
 
     void set_processes(size_t processes)
     {
@@ -53,12 +53,10 @@ public:
     }
 
     void push(unsigned bornTime, unsigned execTime, unsigned deadline,
-              unsigned quantum, unsigned overload, unsigned pid,
-              size_t nPages)
+              unsigned pid, size_t nPages)
     {
         auto process = std::make_unique<Process>(bornTime, execTime, deadline,
-                                                 quantum, overload, pid,
-                                                 nPages);
+                                                 pid, nPages);
         buffer.push_back(std::move(process));
     }
 

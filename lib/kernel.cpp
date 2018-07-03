@@ -35,11 +35,11 @@ void Kernel::run()
         this->next();
     else if(scheduler->is_preemptive())
     {
-        if(quantum)
-            quantum--;
-        else if(overload)
+        if(quantum_counter)
+            quantum_counter--;
+        else if(overload_counter)
         {
-            overload--;
+            overload_counter--;
             if(cpu->state() != CPUState::Overload)
             {
                 scheduler->push(cpu->drop());
@@ -70,8 +70,8 @@ void Kernel::next()
         {
             if(scheduler->is_preemptive())
             {
-                quantum = process->quantum - 1;
-                overload = process->overload;
+                quantum_counter = quantum - 1;
+                overload_counter = overload;
             }
             cpu->push(std::move(process));
         }

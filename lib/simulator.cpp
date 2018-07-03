@@ -26,7 +26,8 @@ void Simulator::time()
     if(auto process = cpu->run())
         runtime += current_time - process->bornTime;
 }
-void Simulator::set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
+void Simulator::set_kernel(SchedulerKind sKind, unsigned quantum,
+                           unsigned overload, MemoryManagerKind mmKind,
                            unsigned shift_delay, size_t virtual_pages,
                            size_t ram_pages)
 {
@@ -65,7 +66,7 @@ void Simulator::set_kernel(SchedulerKind sKind, MemoryManagerKind mmKind,
         default:
             break;
     }
-    kernel = std::make_unique<Kernel>(cpu, std::move(scheduler),
-                                      std::move(memMng));
+    kernel = std::make_unique<Kernel>(cpu, std::move(scheduler), quantum,
+                                      overload, std::move(memMng));
 }
 }
