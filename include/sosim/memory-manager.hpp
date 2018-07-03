@@ -63,6 +63,7 @@ private:
     {
     }
 
+    std::shared_ptr<std::vector<size_t> > refs_in_use;
     unsigned shift_delay;
     unsigned delay;
 
@@ -109,7 +110,7 @@ public:
     bool operator() (const std::vector<unsigned>::iterator &i,
                      const std::vector<unsigned>::iterator &j)
     {
-        return *i < *j;
+        return *i >= *j;
     }
 };
 
@@ -131,6 +132,11 @@ private:
     void update_access_table(size_t alloc_position) override
     {
         access_table[alloc_position] = current_access++;
+
+        // Forces reorganization of the priority_queue
+        auto it = this->alloc_position.top();
+        this->alloc_position.pop();
+        this->alloc_position.push(it);
     }
 
     auto next_alloc_position() -> size_t override

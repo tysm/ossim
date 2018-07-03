@@ -52,6 +52,7 @@ bool MemoryManager::try_alloc(unsigned pid,
         else if(!checking)
             update_access_table(page_table[ref].first);
     }
+    refs_in_use = std::move(page_refs);
     return true;
 }
 
