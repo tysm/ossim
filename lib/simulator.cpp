@@ -11,7 +11,7 @@ namespace sosim
 {
 void Simulator::run()
 {
-    while(!buffer.empty() && buffer.front()->bornTime <= current_time)
+    while(!buffer.empty() && buffer.front()->born_time <= current_time)
     {
         kernel->push(std::move(buffer.front()));
         buffer.pop_front();
@@ -24,8 +24,9 @@ void Simulator::time()
     sleep(delay);
     current_time++;
     if(auto process = cpu->run())
-        runtime += current_time - process->bornTime;
+        runtime += current_time - process->born_time;
 }
+
 void Simulator::set_kernel(SchedulerKind sKind, unsigned quantum,
                            unsigned overload, MemoryManagerKind mmKind,
                            unsigned shift_delay, size_t virtual_pages,

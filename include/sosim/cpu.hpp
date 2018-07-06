@@ -19,8 +19,8 @@ public:
     {
         if(process)
         {
-            process->execTime--;
-            if(process->execTime == 0)
+            process->exec_time--;
+            if(process->exec_time == 0)
                 return std::move(process);
         }
         return nullptr;

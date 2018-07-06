@@ -11,8 +11,16 @@ using vector_pair = std::vector<std::pair<T, U> >;
 /// The process structure.
 struct Process
 {
-    unsigned bornTime;
-    unsigned execTime;
+    /// Every process must have:
+    ///
+    /// Its creation time aka 'born_time;
+    /// Its execution time aka 'exec_time';
+    /// Its deadline;
+    /// Its process ID aka 'pid';
+    /// Its page references aka 'page_refs';
+
+    unsigned born_time;
+    unsigned exec_time;
     unsigned deadline;
 
     unsigned pid;
@@ -24,9 +32,10 @@ struct Process
     std::shared_ptr<vector_pair<size_t, size_t> > page_refs;
 
 
-    explicit Process(unsigned bornTime, unsigned execTime, unsigned deadline,
+    explicit Process(unsigned born_time, unsigned exec_time, unsigned deadline,
                      unsigned pid, size_t nPages) :
-        bornTime(bornTime), execTime(execTime), deadline(deadline), pid(pid),
+        born_time(born_time), exec_time(exec_time), deadline(deadline),
+        pid(pid),
         page_refs(std::make_shared<vector_pair<size_t, size_t> >(nPages))
     {
         for(size_t i = 0; i < nPages; ++i)

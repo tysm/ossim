@@ -9,7 +9,7 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
         while(delay != 1 && (*alloc_buffer.front()).first == size_t(-1) &&
               alloc(process->pid, *alloc_buffer.front(), false))
         {
-            delay--;
+            delay -= shift_delay;
             alloc_buffer.pop_front();
         }
 

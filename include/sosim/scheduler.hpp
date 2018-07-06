@@ -69,7 +69,7 @@ private:
     bool comparator(const std::unique_ptr<Process> &i,
                     const std::unique_ptr<Process> &j) override
     {
-        return i->execTime < j->execTime;
+        return i->exec_time < j->exec_time;
     }
 };
 

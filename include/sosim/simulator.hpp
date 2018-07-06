@@ -52,10 +52,10 @@ public:
         this->delay = delay;
     }
 
-    void push(unsigned bornTime, unsigned execTime, unsigned deadline,
+    void push(unsigned born_time, unsigned exec_time, unsigned deadline,
               unsigned pid, size_t nPages)
     {
-        auto process = std::make_unique<Process>(bornTime, execTime, deadline,
+        auto process = std::make_unique<Process>(born_time, exec_time, deadline,
                                                  pid, nPages);
         buffer.push_back(std::move(process));
     }
