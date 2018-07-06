@@ -6,7 +6,7 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)
     {
-        while(delay != 1 && *alloc_buffer.front() == size_t(-1) &&
+        while(delay != 1 && (*alloc_buffer.front()).first == size_t(-1) &&
               alloc(process->pid, *alloc_buffer.front(), false))
         {
             delay--;
@@ -33,7 +33,7 @@ void MemoryManager::push(std::unique_ptr<Process> process)
     {
         auto &ref = (*process->page_refs)[i];
         // Unallocated process or page fault
-        if(ref == size_t(-1) || !page_table[ref].second)
+        if(ref.first == size_t(-1) || !page_table[ref.first].second)
             alloc_buffer.push_back(&ref);
     }
     delay = shift_delay*alloc_buffer.size();
@@ -41,34 +41,36 @@ void MemoryManager::push(std::unique_ptr<Process> process)
 }
 
 bool MemoryManager::try_alloc(unsigned pid,
-                              std::shared_ptr<std::vector<size_t> > page_refs,
+                              std::shared_ptr<vector_pair<size_t,
+                                                          size_t> > page_refs,
                               bool checking)
 {
     for(size_t i = 0; i < page_refs->size(); ++i)
     {
         auto &ref = (*page_refs)[i];
         // Unallocated process
-        if(ref == size_t(-1) && !alloc(pid, ref, false))
+        if(ref.first == size_t(-1) && !alloc(pid, ref, false))
             return false;
 
         // Page fault
-        else if(!page_table[ref].second)
+        else if(!page_table[ref.first].second)
             return false;
 
         // Re-access successfully
         else if(!checking)
-            make_updates(ref, page_table[ref].first);
+            make_updates(ref.first, page_table[ref.first].first);
     }
     refs_in_use = std::move(page_refs);
     return true;
 }
 
-bool MemoryManager::alloc(unsigned pid, size_t &ref, bool force_alloc)
+bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref,
+                          bool force_alloc)
 {
     auto alloc_position = this->alloc_position();
     auto used_ref = was_allocated(alloc_position);
     // Unallocated process
-    if(ref == size_t(-1))
+    if(ref.first == size_t(-1))
     {
         // There's not empty space, can't alloc
         if(!force_alloc && used_ref != size_t(-1))
@@ -76,14 +78,14 @@ bool MemoryManager::alloc(unsigned pid, size_t &ref, bool force_alloc)
             regress_alloc_position();
             return false;
         }
-        ref = virtual_position();
+        ref.first = virtual_position();
     }
 
     // Process allocated but its page is in swap
     else
     {
         auto it = swap.begin();
-        while(*it != pid)
+        while((*it).first != pid || (*it).second != ref.second)
             it++;
         swap.erase(it);
     }
@@ -94,11 +96,11 @@ bool MemoryManager::alloc(unsigned pid, size_t &ref, bool force_alloc)
         page_table[used_ref].second = false;
         swap.push_back(ram[alloc_position]);
     }
-    ram[alloc_position] = pid;
-    page_table[ref] = {alloc_position, true};
+    ram[alloc_position] = {pid, ref.second};
+    page_table[ref.first] = {alloc_position, true};
 
     // New access successfully
-    make_updates(ref, alloc_position);
+    make_updates(ref.first, alloc_position);
     return true;
 }
 }

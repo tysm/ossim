@@ -32,7 +32,7 @@ public:
     explicit MemoryManager(unsigned shift_delay, size_t virtual_pages,
                            size_t ram_pages) :
         shift_delay(shift_delay), page_table(virtual_pages, {-1, false}),
-        ram(ram_pages, 0)
+        ram(ram_pages, {0, -1})
     {
     }
 
@@ -41,7 +41,7 @@ public:
     void push(std::unique_ptr<Process> process);
 
     bool try_alloc(unsigned pid,
-                   std::shared_ptr<std::vector<size_t> > page_refs,
+                   std::shared_ptr<vector_pair<size_t, size_t> > page_refs,
                    bool checking);
 
     auto state() -> MemoryManagerState
@@ -56,14 +56,14 @@ public:
             if(!just_flush)
             {
                 for(auto ref : *refs_in_use)
-                    page_table[ref] = {-1, false};
+                    page_table[ref.first] = {-1, false};
             }
             refs_in_use.reset();
         }
     }
 
 private:
-    bool alloc(unsigned pid, size_t &ref, bool blocked_process);
+    bool alloc(unsigned pid, std::pair<size_t, size_t> &ref, bool force_alloc);
 
     virtual void make_updates(size_t virtual_position, size_t alloc_position)
     {
@@ -92,14 +92,14 @@ private:
     {
     }
 
-    std::shared_ptr<std::vector<size_t> > refs_in_use;
+    std::shared_ptr<vector_pair<size_t, size_t> > refs_in_use;
     unsigned shift_delay;
     unsigned delay;
 
-    std::vector<unsigned> swap;
+    vector_pair<unsigned, size_t> swap;
 
     std::unique_ptr<Process> process;
-    std::list<size_t*> alloc_buffer;
+    std::list<std::pair<size_t, size_t>* > alloc_buffer;
 
 protected:
     bool valid_virtual_position(size_t virtual_position)
@@ -113,15 +113,15 @@ protected:
         {
             for(auto ref : *refs_in_use)
             {
-                if(page_table[ref].first == alloc_position)
+                if(page_table[ref.first].first == alloc_position)
                     return false;
             }
         }
         return true;
     }
 
-    std::vector<std::pair<size_t, bool> > page_table;
-    std::vector<unsigned> ram;
+    vector_pair<size_t, bool> page_table;
+    vector_pair<unsigned, size_t> ram;
 };
 
 class FIFO_MM : public MemoryManager
