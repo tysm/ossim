@@ -149,6 +149,7 @@ protected:
         return true;
     }
 
+public: // CAGUEI AQUI
     /// Page table (virtual memory) abstraction.
     ///
     /// The first attribute holds a 'ram' address refered by some process
@@ -178,9 +179,10 @@ private:
     /// Returns a valid (free) virtual allocation position in 'page_table'.
     auto virtual_position() -> size_t override
     {
-        auto p = next_virtual_position %= page_table.size();
+        next_virtual_position %= page_table.size();
+        auto p = next_virtual_position;
         auto last = p;
-        while(!valid_virtual_position(p) && ++p != last)
+        while(!valid_virtual_position(p) && (++p) % page_table.size() != last)
             p %= page_table.size();
         //if(p == last)
             // TODO catch full virtual memory error.

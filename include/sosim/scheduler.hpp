@@ -40,6 +40,13 @@ public:
         return false;
     }
 
+    virtual bool is_over_deadline(unsigned current_time,
+                                  const Process& process) const
+    {
+        fputs("IS OVER DEADLINE = FALSE\n", stderr);
+        return false;
+    }
+
     auto remaining_processes() -> size_t
     {
         return ready.size();
@@ -88,6 +95,14 @@ class RoundRobin : public Preemptive
 
 class EDF : public Preemptive
 {
+public:
+    virtual bool is_over_deadline(unsigned current_time,
+                                  const Process& process) const
+    {
+        fputs("IS OVER DEADLINE = TRUE\n", stderr);
+        return current_time - process.born_time >= process.deadline;
+    }
+
 private:
     bool comparator(const std::unique_ptr<Process> &i,
                     const std::unique_ptr<Process> &j) override

@@ -33,9 +33,39 @@ public:
         return cpu->state();
     }
 
+    auto cpu_pid() -> unsigned
+    {
+        if(auto proc = cpu->current_process())
+        {
+            if(proc->pid != 0)
+                return proc->pid;
+        }
+        return this->last_pid;
+    }
+
+    auto cpu_time() -> unsigned
+    {
+        return this->current_time;
+    }
+
+    bool is_over_deadline() const
+    {
+        if(auto proc = cpu->current_process())
+        {
+            return kernel->get_scheduler().is_over_deadline(current_time, *proc);
+        }
+        return false;
+    }
+
+    auto get_memory_manager() -> const MemoryManager&
+    {
+        return kernel->get_memory_manager();
+    }
+
     auto remaining_processes() -> size_t
     {
-        return kernel->remaining_processes();
+        fprintf(stderr, "REMAINING BUFFER %d\n", buffer.size());
+        return kernel->remaining_processes() + this->buffer.size();
     }
 
     void set_kernel(SchedulerKind sKind, unsigned quantum, unsigned overload,
@@ -68,6 +98,7 @@ private:
 
     unsigned current_time;
     unsigned delay;
+    unsigned last_pid = 0;
 
     unsigned long long runtime;
 

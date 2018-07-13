@@ -21,8 +21,10 @@ void Simulator::run()
 
 void Simulator::time()
 {
-    sleep(delay);
+    //sleep(delay);
     current_time++;
+    if(this->cpu_state() != CPUState::Idle)
+        this->last_pid = this->cpu_pid();
     if(auto process = cpu->run())
         runtime += current_time - process->born_time;
 }

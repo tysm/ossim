@@ -44,6 +44,11 @@ public:
         return !process->pid? CPUState::Overload : CPUState::Exec;
     }
 
+    auto current_process() -> const Process*
+    {
+        return this->process.get();
+    }
+
 private:
     std::unique_ptr<Process> process;
 };

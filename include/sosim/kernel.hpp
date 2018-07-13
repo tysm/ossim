@@ -39,6 +39,16 @@ public:
         return remaining;
     }
 
+    auto get_scheduler() -> const Scheduler&
+    {
+        return *this->scheduler;
+    }
+
+    auto get_memory_manager() -> const MemoryManager&
+    {
+        return *memMng;
+    }
+
 private:
     void next();
 
