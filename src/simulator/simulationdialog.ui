@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>857</width>
-    <height>468</height>
+    <width>872</width>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -181,7 +181,7 @@
     <rect>
      <x>580</x>
      <y>30</y>
-     <width>171</width>
+     <width>181</width>
      <height>181</height>
     </rect>
    </property>
@@ -233,12 +233,12 @@
    <column/>
    <column/>
   </widget>
-  <widget class="QTableWidget" name="ramTable_2">
+  <widget class="QTableWidget" name="diskTable">
    <property name="geometry">
     <rect>
      <x>580</x>
      <y>270</y>
-     <width>171</width>
+     <width>181</width>
      <height>181</height>
     </rect>
    </property>
@@ -329,12 +329,12 @@
     <string>Timeline</string>
    </property>
   </widget>
-  <widget class="QTableWidget" name="tableWidget">
+  <widget class="QTableWidget" name="pageTable">
    <property name="geometry">
     <rect>
      <x>770</x>
      <y>30</y>
-     <width>71</width>
+     <width>81</width>
      <height>421</height>
     </rect>
    </property>
@@ -464,6 +464,19 @@
    </property>
    <property name="text">
     <string>Page Table</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="responseLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>460</y>
+     <width>281</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Turnaround Médio</string>
    </property>
   </widget>
  </widget>

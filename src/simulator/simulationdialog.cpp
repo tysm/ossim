@@ -2,7 +2,7 @@
 #include "ui_simulationdialog.h"
 using namespace sosim;
 
-static const int colorTable[] = {
+static const QColor colorTable[] = {
     Qt::red,
     Qt::green,
     Qt::blue,
@@ -16,7 +16,6 @@ static const int colorTable[] = {
     Qt::darkMagenta,
     Qt::darkYellow,
     Qt::lightGray,
-    Qt::gray,
     Qt::darkGray,
     Qt::black,
 };
@@ -28,6 +27,31 @@ SimulationDialog::SimulationDialog(std::unique_ptr<sosim::Simulator> sim,
     sim(std::move(sim))
 {
     ui->setupUi(this);
+
+    auto respLabel = this->findChild<QLabel*>("responseLabel");
+    auto ramTable = this->findChild<QTableWidget*>("ramTable");
+    auto diskTable = this->findChild<QTableWidget*>("diskTable");
+    auto pageTable = this->findChild<QTableWidget*>("pageTable");
+
+    respLabel->setText("");
+
+    for(int i = 0; i < ramTable->rowCount(); ++i)
+    {
+        for(int j = 0; j < ramTable->columnCount(); ++j)
+            ramTable->setItem(i, j, new QTableWidgetItem());
+    }
+
+    for(int i = 0; i < diskTable->rowCount(); ++i)
+    {
+        for(int j = 0; j < diskTable->columnCount(); ++j)
+            diskTable->setItem(i, j, new QTableWidgetItem());
+    }
+
+    for(int i = 0; i < pageTable->rowCount(); ++i)
+    {
+        for(int j = 0; j < pageTable->columnCount(); ++j)
+            pageTable->setItem(i, j, new QTableWidgetItem());
+    }
 }
 
 
@@ -38,6 +62,9 @@ SimulationDialog::~SimulationDialog()
 
 int SimulationDialog::exec()
 {
+    auto respLabel = this->findChild<QLabel*>("responseLabel");
+    respLabel->setText("Executing...");
+
     this->timer = this->startTimer(1000);
     this->performTick();
     return QDialog::exec();
@@ -52,6 +79,9 @@ void SimulationDialog::timerEvent(QTimerEvent* event)
                 this->sim->cpu_pid(), this->sim->cpu_time(),
                 (int) this->sim->cpu_state(),
                 sim->remaining_processes());
+
+        auto respLabel = this->findChild<QLabel*>("responseLabel");
+        respLabel->setText(QString::asprintf("Turnaround: %f", sim->runtime_per_process()));
         return;
     }
 
@@ -132,21 +162,67 @@ void SimulationDialog::updateRAM()
         auto column = i / 10;
         auto pid = memgr.ram[i].first;
 
-        auto color = colorTable[pid % colorTableSize];
-
-        auto item = new QTableWidgetItem();
-        item->setBackgroundColor(color);
-        ramTable->getItem(row, column)->setBackgroundColor(color);
-        ramTable->setItem(row, column, item);
+        if(row < ramTable->rowCount() && column < ramTable->columnCount())
+        {
+            auto color = !pid? Qt::gray : colorTable[pid % colorTableSize];
+            ramTable->item(row, column)->setBackground(color);
+        }
     }
 }
 
 void SimulationDialog::updateDisk()
 {
+    const size_t colorTableSize = sizeof(colorTable) / sizeof(*colorTable);
 
+    auto diskTable = this->findChild<QTableWidget*>("diskTable");
+
+    for(int i = 0; i < diskTable->rowCount(); ++i)
+    {
+        for(int j = 0; j < diskTable->columnCount(); ++j)
+            diskTable->item(i, j)->setBackground(Qt::gray);
+    }
+
+    auto& memgr = sim->get_memory_manager();
+    for(int i = 0; i < memgr.swap.size(); ++i)
+    {
+        auto row = i % 10;
+        auto column = i / 10;
+        auto pid = memgr.swap[i].first;
+
+        if(row < diskTable->rowCount() && column < diskTable->columnCount())
+        {
+            auto color = !pid? Qt::gray : colorTable[pid % colorTableSize];
+            diskTable->item(row, column)->setBackground(color);
+        }
+    }
 }
 
 void SimulationDialog::updatePageTable()
 {
+    auto pageTable = this->findChild<QTableWidget*>("pageTable");
 
+    auto& memgr = sim->get_memory_manager();
+    for(int i = 0; i < memgr.page_table.size(); ++i)
+    {
+        auto ram_pos = memgr.page_table[i].first;
+        auto valid = memgr.page_table[i].second;
+        if(i < pageTable->rowCount())
+        {
+            for(int j = 0; j < pageTable->columnCount(); ++j)
+            {
+                auto color = ram_pos == -1? Qt::gray : Qt::white;
+                pageTable->item(i, j)->setBackground(color);
+            }
+
+            QString first, second;
+            if(ram_pos != -1)
+            {
+                first = QString::number(ram_pos);
+                second = valid? "Y" : "N";
+            }
+
+            pageTable->item(i, 0)->setData(Qt::DisplayRole, first);
+            pageTable->item(i, 1)->setData(Qt::DisplayRole, second);
+        }
+    }
 }

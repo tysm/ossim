@@ -1,6 +1,6 @@
 # Created by https://www.gitignore.io/api/c++
 src/build-*
-*.autosave
+#*.autosave
 
 ### C++ ###
 # Prerequisites

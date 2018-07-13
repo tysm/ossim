@@ -117,6 +117,7 @@ private:
     /// Current delay counter.
     unsigned delay;
 
+public: // MAIS CAGADAS (TODO)
     /// Disk space abstraction.
     vector_pair<unsigned, size_t> swap;
 
@@ -149,7 +150,7 @@ protected:
         return true;
     }
 
-public: // CAGUEI AQUI
+public: // CAGUEI AQUI (TODO)
     /// Page table (virtual memory) abstraction.
     ///
     /// The first attribute holds a 'ram' address refered by some process
