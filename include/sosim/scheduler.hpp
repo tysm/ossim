@@ -95,7 +95,7 @@ class RoundRobin : public Preemptive
 class EDF : public Preemptive
 {
 public:
-    virtual bool is_over_deadline(unsigned current_time,
+    bool is_over_deadline(unsigned current_time,
                                   const Process& process) const
     {
         fputs("IS OVER DEADLINE = TRUE\n", stderr);
@@ -106,7 +106,7 @@ private:
     bool comparator(const std::unique_ptr<Process> &i,
                     const std::unique_ptr<Process> &j) override
     {
-        return i->deadline < j->deadline;
+        return i->born_time + i->deadline < j->born_time + j->deadline;
     }
 };
 }

@@ -6,19 +6,22 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)
     {
-        while(delay != 1 && (*alloc_buffer.front()).first == size_t(-1) &&
+        while(delay >= shift_delay && (*alloc_buffer.front()).first == size_t(-1) &&
               alloc(process->pid, *alloc_buffer.front(), false))
         {
             delay -= shift_delay;
             alloc_buffer.pop_front();
         }
 
-        delay--;
-
-        if(delay%shift_delay == 0)
+        if(delay)
         {
-            alloc(process->pid, *alloc_buffer.front(), true);
-            alloc_buffer.pop_front();
+            delay--;
+
+            if(delay%shift_delay == 0)
+            {
+                alloc(process->pid, *alloc_buffer.front(), true);
+                alloc_buffer.pop_front();
+            }
         }
 
         if(!delay)

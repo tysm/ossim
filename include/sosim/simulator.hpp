@@ -24,7 +24,7 @@ public:
     auto runtime_per_process() -> double
     {
         if(auto conclued = processes - remaining_processes())
-            return runtime/conclued;
+            return double(runtime)/conclued;
         return 0;
     }
 
