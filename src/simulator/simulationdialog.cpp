@@ -73,6 +73,7 @@ void SimulationDialog::timerEvent(QTimerEvent* event)
 {
     if(sim->cpu_state() == CPUState::Idle && sim->remaining_processes() == 0)
     {
+        this->performTick();
         this->killTimer(this->timerHandle);
         responseLabel->setText(QString::asprintf("Turnaround: %f", sim->runtime_per_process()));
     }
@@ -127,11 +128,14 @@ void SimulationDialog::updateTimeline()
     }
     else
     {
-        for(int i = 0; i < timelineTable->rowCount(); ++i)
+        if(sim->remaining_processes() != 0)
         {
-            auto item = new QTableWidgetItem();
-            item->setBackgroundColor(color);
-            timelineTable->setItem(i, column - 1, item);
+            for(int i = 0; i < timelineTable->rowCount(); ++i)
+            {
+                auto item = new QTableWidgetItem();
+                item->setBackgroundColor(color);
+                timelineTable->setItem(i, column - 1, item);
+            }
         }
     }
 }
