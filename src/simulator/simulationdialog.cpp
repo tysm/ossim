@@ -39,23 +39,13 @@ SimulationDialog::SimulationDialog(std::unique_ptr<sosim::Simulator> sim_,
     for(int i = 0; i < ramTable->rowCount(); ++i)
     {
         for(int j = 0; j < ramTable->columnCount(); ++j)
-        {
-            auto item = new QTableWidgetItem();
-            auto pageNum = j*ramTable->columnCount() + i;
-            item->setText(QString::asprintf("%.2d", pageNum));
-            ramTable->setItem(i, j, item);
-        }
+            ramTable->setItem(i, j, new QTableWidgetItem());
     }
 
     for(int i = 0; i < diskTable->rowCount(); ++i)
     {
         for(int j = 0; j < diskTable->columnCount(); ++j)
-        {
-            auto item = new QTableWidgetItem();
-            auto pageNum = j*diskTable->rowCount() + i;
-            item->setText(QString::asprintf("%.2d", pageNum));
-            diskTable->setItem(i, j, item);
-        }
+            diskTable->setItem(i, j, new QTableWidgetItem());
     }
 
     for(int i = 0; i < pageTable->rowCount(); ++i)
@@ -156,10 +146,12 @@ void SimulationDialog::updateRAM()
         auto row = i % ramTable->rowCount();
         auto column = i / ramTable->rowCount();
         auto pid = memgr.ram[i].first;
+        auto vpage = !pid? 0 : memgr.ram[i].second;
 
         if(row < ramTable->rowCount() && column < ramTable->columnCount())
         {
             auto color = !pid? Qt::gray : colorTable[pid % colorTableSize];
+            ramTable->item(row, column)->setText(QString::asprintf("%.2d", vpage));
             ramTable->item(row, column)->setBackground(color);
         }
     }
@@ -172,7 +164,10 @@ void SimulationDialog::updateDisk()
     for(int i = 0; i < diskTable->rowCount(); ++i)
     {
         for(int j = 0; j < diskTable->columnCount(); ++j)
+        {
+            diskTable->item(i, j)->setText("00");
             diskTable->item(i, j)->setBackground(Qt::gray);
+        }
     }
 
     auto& memgr = sim->get_memory_manager();
@@ -181,10 +176,12 @@ void SimulationDialog::updateDisk()
         auto row = i % diskTable->rowCount();
         auto column = i / diskTable->rowCount();
         auto pid = memgr.swap[i].first;
+        auto vpage = !pid? 0 : memgr.swap[i].second;
 
         if(row < diskTable->rowCount() && column < diskTable->columnCount())
         {
             auto color = !pid? Qt::gray : colorTable[pid % colorTableSize];
+            diskTable->item(row, column)->setText(QString::asprintf("%.2d", vpage));
             diskTable->item(row, column)->setBackground(color);
         }
     }
