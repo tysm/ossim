@@ -2,6 +2,8 @@
 #include "ui_simulatorgui.h"
 #include "processdialog.h"
 #include "simulationdialog.h"
+#include <sosim/simulator.hpp>
+using namespace sosim;
 
 SimulatorGUI::SimulatorGUI(QWidget *parent) :
     QMainWindow(parent),
@@ -17,51 +19,49 @@ SimulatorGUI::~SimulatorGUI()
 
 void SimulatorGUI::on_Next_clicked()
 {
-    auto nProcs = this->findChild<QSpinBox*>("nProcs")->value();
+    auto simuDelay = this->findChild<QSpinBox*>("delay")->value();
+    auto numProcs = this->findChild<QSpinBox*>("nProcs")->value();
     auto quantum = this->findChild<QSpinBox*>("quantumBox")->value();
     auto overload = this->findChild<QSpinBox*>("overloadBox")->value();
-    auto shift_delay = this->findChild<QSpinBox*>("pDelay")->value();
-    auto virtual_pages = this->findChild<QSpinBox*>("nVirtual")->value();
-    auto ram_pages = this->findChild<QSpinBox*>("nRAM")->value();
+    auto shiftDelay = this->findChild<QSpinBox*>("pDelay")->value();
+    auto virtualPages = this->findChild<QSpinBox*>("nVirtual")->value();
+    auto ramPages = this->findChild<QSpinBox*>("nRAM")->value();
 
-    SchedulerKind sKind = SchedulerKind::FIFO_S;
+    auto scheduler = SchedulerKind::FIFO_S;
     if(this->findChild<QPushButton*>("FIFO_S")->isChecked())
-        sKind = SchedulerKind::FIFO_S;
+        scheduler = SchedulerKind::FIFO_S;
     else if(this->findChild<QPushButton*>("SJF")->isChecked())
-        sKind = SchedulerKind::SJF;
+        scheduler = SchedulerKind::SJF;
     else if(this->findChild<QPushButton*>("EDF")->isChecked())
-        sKind = SchedulerKind::EDF;
+        scheduler = SchedulerKind::EDF;
     else if(this->findChild<QPushButton*>("RoundRobin")->isChecked())
-        sKind = SchedulerKind::RoundRobin;
+        scheduler = SchedulerKind::RoundRobin;
 
-    MemoryManagerKind mmKind = MemoryManagerKind::FIFO_MM;
+    auto mman = MemoryManagerKind::FIFO_MM;
     if(this->findChild<QPushButton*>("FIFO_MM")->isChecked())
-        mmKind = MemoryManagerKind::FIFO_MM;
+        mman = MemoryManagerKind::FIFO_MM;
     else if(this->findChild<QPushButton*>("LRU")->isChecked())
-        mmKind = MemoryManagerKind::LRU;
+        mman = MemoryManagerKind::LRU;
 
-    this->sosim = std::make_unique<Simulator>();
-    this->sosim->set_processes(nProcs);
-    this->sosim->set_kernel(sKind, quantum, overload, mmKind, shift_delay, virtual_pages, ram_pages);
+    auto sim = std::make_unique<sosim::Simulator>();
+    sim->set_kernel(scheduler, quantum, overload, mman, shiftDelay, virtualPages, ramPages);
 
-    for(int i = 0; i < nProcs; ++i)
+    for(int i = 0; i < numProcs; ++i)
     {
-        auto processDialog = std::make_unique<ProcessDialog>(this);
-        processDialog->findChild<QSpinBox*>("pidBox")->setValue(i + 1);
-        if(processDialog->exec() == QDialog::Rejected)
+        ProcessDialog processDialog(this);
+        processDialog.findChild<QSpinBox*>("pidBox")->setValue(i + 1);
+
+        if(processDialog.exec() == QDialog::Rejected)
             return;
 
-        auto pid = processDialog->findChild<QSpinBox*>("pidBox")->value();
-        auto bornTime = processDialog->findChild<QSpinBox*>("bornBox")->value();
-        auto execTime = processDialog->findChild<QSpinBox*>("execBox")->value();
-        auto deadline = processDialog->findChild<QSpinBox*>("deadBox")->value();
-        auto nPages = processDialog->findChild<QSpinBox*>("nPagesBox")->value();
-        this->sosim->push(bornTime, execTime, deadline, pid, nPages);
+        auto pid = processDialog.findChild<QSpinBox*>("pidBox")->value();
+        auto bornTime = processDialog.findChild<QSpinBox*>("bornBox")->value();
+        auto execTime = processDialog.findChild<QSpinBox*>("execBox")->value();
+        auto deadline = processDialog.findChild<QSpinBox*>("deadBox")->value();
+        auto nPages = processDialog.findChild<QSpinBox*>("nPagesBox")->value();
+        sim->push(bornTime, execTime, deadline, pid, nPages);
     }
 
-    auto simdiag = std::make_unique<SimulationDialog>(std::move(sosim), this);
-    simdiag->exec();
+    SimulationDialog simulatorDialog(std::move(sim), simuDelay, this);
+    simulatorDialog.exec();
 }
-
-
-

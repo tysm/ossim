@@ -21,7 +21,7 @@ public:
 
     void time();
 
-    auto runtime_per_process() -> long double
+    auto runtime_per_process() -> double
     {
         if(auto conclued = processes - remaining_processes())
             return runtime/conclued;
@@ -64,18 +64,12 @@ public:
 
     auto remaining_processes() -> size_t
     {
-        fprintf(stderr, "REMAINING BUFFER %d\n", buffer.size());
         return kernel->remaining_processes() + this->buffer.size();
     }
 
     void set_kernel(SchedulerKind sKind, unsigned quantum, unsigned overload,
                     MemoryManagerKind mmKind, unsigned shift_delay,
                     size_t virtual_pages, size_t ram_pages);
-
-    void set_processes(size_t processes)
-    {
-        this->processes = processes;
-    }
 
     void set_delay(unsigned delay)
     {
@@ -88,13 +82,14 @@ public:
         auto process = std::make_unique<Process>(born_time, exec_time, deadline,
                                                  pid, nPages);
         buffer.push_back(std::move(process));
+        ++processes;
     }
 
 private:
     std::shared_ptr<CPU> cpu;
     std::unique_ptr<Kernel> kernel;
 
-    size_t processes;
+    size_t processes = 0;
 
     unsigned current_time;
     unsigned delay;

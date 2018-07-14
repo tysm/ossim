@@ -1,13 +1,10 @@
-#include "simulatorgui.h"
 #include <QApplication>
+#include "simulatorgui.h"
 
 int main(int argc, char *argv[])
 {
-    srand(time(0));
-
-    QApplication a(argc, argv);
-    SimulatorGUI w;
-    w.show();
-
-    return a.exec();
+    QApplication app(argc, argv);
+    SimulatorGUI window;
+    window.show();
+    return app.exec();
 }

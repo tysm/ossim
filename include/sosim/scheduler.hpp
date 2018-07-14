@@ -43,7 +43,6 @@ public:
     virtual bool is_over_deadline(unsigned current_time,
                                   const Process& process) const
     {
-        fputs("IS OVER DEADLINE = FALSE\n", stderr);
         return false;
     }
 

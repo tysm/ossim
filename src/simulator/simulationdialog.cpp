@@ -3,8 +3,8 @@
 using namespace sosim;
 
 static const QColor colorTable[] = {
-    Qt::red,
-    Qt::green,
+    //Qt::red,
+    //Qt::green,
     Qt::blue,
     Qt::cyan,
     Qt::magenta,
@@ -20,31 +20,42 @@ static const QColor colorTable[] = {
     Qt::black,
 };
 
-SimulationDialog::SimulationDialog(std::unique_ptr<sosim::Simulator> sim,
+SimulationDialog::SimulationDialog(std::unique_ptr<sosim::Simulator> sim_,
+                                   unsigned simulationTimeStep_,
                                    QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SimulationDialog),
-    sim(std::move(sim))
+    sim(std::move(sim_)),
+    simulationTimeStep(simulationTimeStep_)
 {
     ui->setupUi(this);
 
-    auto respLabel = this->findChild<QLabel*>("responseLabel");
-    auto ramTable = this->findChild<QTableWidget*>("ramTable");
-    auto diskTable = this->findChild<QTableWidget*>("diskTable");
-    auto pageTable = this->findChild<QTableWidget*>("pageTable");
-
-    respLabel->setText("");
+    this->timelineTable = this->findChild<QTableWidget*>("timelineTable");
+    this->responseLabel = this->findChild<QLabel*>("responseLabel");
+    this->ramTable = this->findChild<QTableWidget*>("ramTable");
+    this->diskTable = this->findChild<QTableWidget*>("diskTable");
+    this->pageTable = this->findChild<QTableWidget*>("pageTable");
 
     for(int i = 0; i < ramTable->rowCount(); ++i)
     {
         for(int j = 0; j < ramTable->columnCount(); ++j)
-            ramTable->setItem(i, j, new QTableWidgetItem());
+        {
+            auto item = new QTableWidgetItem();
+            auto pageNum = j*ramTable->columnCount() + i;
+            item->setText(QString::asprintf("%.2d", pageNum));
+            ramTable->setItem(i, j, item);
+        }
     }
 
     for(int i = 0; i < diskTable->rowCount(); ++i)
     {
         for(int j = 0; j < diskTable->columnCount(); ++j)
-            diskTable->setItem(i, j, new QTableWidgetItem());
+        {
+            auto item = new QTableWidgetItem();
+            auto pageNum = j*diskTable->rowCount() + i;
+            item->setText(QString::asprintf("%.2d", pageNum));
+            diskTable->setItem(i, j, item);
+        }
     }
 
     for(int i = 0; i < pageTable->rowCount(); ++i)
@@ -62,10 +73,8 @@ SimulationDialog::~SimulationDialog()
 
 int SimulationDialog::exec()
 {
-    auto respLabel = this->findChild<QLabel*>("responseLabel");
-    respLabel->setText("Executing...");
-
-    this->timer = this->startTimer(1000);
+    responseLabel->setText("Executing...");
+    this->timerHandle = this->startTimer(500 * this->simulationTimeStep);
     this->performTick();
     return QDialog::exec();
 }
@@ -74,29 +83,20 @@ void SimulationDialog::timerEvent(QTimerEvent* event)
 {
     if(sim->cpu_state() == CPUState::Idle && sim->remaining_processes() == 0)
     {
-        this->killTimer(this->timer);
-        fprintf(stderr, "SIMULATION IS OVER PID %d TIME %d STATE %d REMAINING %d\n",
-                this->sim->cpu_pid(), this->sim->cpu_time(),
-                (int) this->sim->cpu_state(),
-                sim->remaining_processes());
-
-        auto respLabel = this->findChild<QLabel*>("responseLabel");
-        respLabel->setText(QString::asprintf("Turnaround: %f", sim->runtime_per_process()));
-        return;
+        this->killTimer(this->timerHandle);
+        responseLabel->setText(QString::asprintf("Turnaround: %f", sim->runtime_per_process()));
     }
-
-    this->performTick();
+    else
+    {
+        this->performTick();
+    }
 }
 
 void SimulationDialog::performTick()
 {
-    fputs("RUN\n", stderr);
     this->sim->run();
-    fputs("updateScreen\n", stderr);
     this->updateScreen();
-    fputs("TIME\n", stderr);
     this->sim->time();
-    fputs("END OF STEP\n", stderr);
 }
 
 void SimulationDialog::updateScreen()
@@ -109,15 +109,12 @@ void SimulationDialog::updateScreen()
 
 void SimulationDialog::updateTimeline()
 {
-    fprintf(stderr, "DOING SIMULATION PID %d TIME %d STATE %d\n",
-            this->sim->cpu_pid(), this->sim->cpu_time(),
-            (int) this->sim->cpu_state());
-
     auto column = this->sim->cpu_time() + 1;
     auto row = this->sim->cpu_pid();
     auto color = Qt::yellow;
 
-    auto procTable = this->findChild<QTableWidget*>("procTable");
+    if(row >= timelineTable->rowCount() || column >= timelineTable->columnCount())
+            return;
 
     switch(this->sim->cpu_state())
     {
@@ -136,30 +133,28 @@ void SimulationDialog::updateTimeline()
     {
         auto item = new QTableWidgetItem();
         item->setBackgroundColor(color);
-        procTable->setItem(row - 1, column - 1, item);
+        timelineTable->setItem(row - 1, column - 1, item);
     }
     else
     {
-        for(int i = 0; i < procTable->columnCount(); ++i)
+        for(int i = 0; i < timelineTable->rowCount(); ++i)
         {
             auto item = new QTableWidgetItem();
             item->setBackgroundColor(color);
-            procTable->setItem(i, column - 1, item);
+            timelineTable->setItem(i, column - 1, item);
         }
     }
 }
 
 void SimulationDialog::updateRAM()
 {
-    const size_t colorTableSize = sizeof(colorTable) / sizeof(*colorTable);
-
-    auto ramTable = this->findChild<QTableWidget*>("ramTable");
+    const auto colorTableSize = sizeof(colorTable) / sizeof(*colorTable);
 
     auto& memgr = sim->get_memory_manager();
-    for(int i = 0; i < memgr.ram.size(); ++i)
+    for(size_t i = 0; i < memgr.ram.size(); ++i)
     {
-        auto row = i % 10;
-        auto column = i / 10;
+        auto row = i % ramTable->rowCount();
+        auto column = i / ramTable->rowCount();
         auto pid = memgr.ram[i].first;
 
         if(row < ramTable->rowCount() && column < ramTable->columnCount())
@@ -172,9 +167,7 @@ void SimulationDialog::updateRAM()
 
 void SimulationDialog::updateDisk()
 {
-    const size_t colorTableSize = sizeof(colorTable) / sizeof(*colorTable);
-
-    auto diskTable = this->findChild<QTableWidget*>("diskTable");
+    const auto colorTableSize = sizeof(colorTable) / sizeof(*colorTable);
 
     for(int i = 0; i < diskTable->rowCount(); ++i)
     {
@@ -183,10 +176,10 @@ void SimulationDialog::updateDisk()
     }
 
     auto& memgr = sim->get_memory_manager();
-    for(int i = 0; i < memgr.swap.size(); ++i)
+    for(size_t i = 0; i < memgr.swap.size(); ++i)
     {
-        auto row = i % 10;
-        auto column = i / 10;
+        auto row = i % diskTable->rowCount();
+        auto column = i / diskTable->rowCount();
         auto pid = memgr.swap[i].first;
 
         if(row < diskTable->rowCount() && column < diskTable->columnCount())
@@ -199,30 +192,38 @@ void SimulationDialog::updateDisk()
 
 void SimulationDialog::updatePageTable()
 {
-    auto pageTable = this->findChild<QTableWidget*>("pageTable");
+    for(int i = 0; i < pageTable->rowCount(); ++i)
+    {
+        for(int j = 0; j < pageTable->columnCount(); ++j)
+        {
+            pageTable->item(i, j)->setBackground(Qt::white);
+            pageTable->item(i, 0)->setData(Qt::DisplayRole, "");
+            pageTable->item(i, 1)->setData(Qt::DisplayRole, "");
+        }
+    }
 
     auto& memgr = sim->get_memory_manager();
-    for(int i = 0; i < memgr.page_table.size(); ++i)
+    for(size_t i = 0; i < memgr.page_table.size(); ++i)
     {
-        auto ram_pos = memgr.page_table[i].first;
-        auto valid = memgr.page_table[i].second;
+        auto ramPos = memgr.page_table[i].first;
+        auto isValid = memgr.page_table[i].second;
         if(i < pageTable->rowCount())
         {
             for(int j = 0; j < pageTable->columnCount(); ++j)
             {
-                auto color = ram_pos == -1? Qt::gray : Qt::white;
+                auto color = ramPos == size_t(-1)? Qt::gray : Qt::white;
                 pageTable->item(i, j)->setBackground(color);
             }
 
-            QString first, second;
-            if(ram_pos != -1)
+            QString ramPosString, isValidString;
+            if(ramPos != size_t(-1))
             {
-                first = QString::number(ram_pos);
-                second = valid? "Y" : "N";
+                ramPosString = QString::number(ramPos);
+                isValidString = isValid? "Y" : "N";
             }
 
-            pageTable->item(i, 0)->setData(Qt::DisplayRole, first);
-            pageTable->item(i, 1)->setData(Qt::DisplayRole, second);
+            pageTable->item(i, 0)->setData(Qt::DisplayRole, ramPosString);
+            pageTable->item(i, 1)->setData(Qt::DisplayRole, isValidString);
         }
     }
 }

@@ -2,8 +2,6 @@
 #define SIMULATORGUI_H
 
 #include <QMainWindow>
-#include <sosim/simulator.hpp>
-using namespace sosim;
 
 namespace Ui {
 class SimulatorGUI;
@@ -18,14 +16,9 @@ public:
     ~SimulatorGUI();
 
 private slots:
-
     void on_Next_clicked();
 
-
 private:
-
-    std::unique_ptr<Simulator> sosim;
-
     Ui::SimulatorGUI *ui;
 };
 

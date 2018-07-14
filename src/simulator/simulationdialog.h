@@ -2,6 +2,8 @@
 #define SIMULATIONDIALOG_H
 
 #include <QDialog>
+#include <QLabel>
+#include <QTableWidget>
 #include <sosim/simulator.hpp>
 
 namespace Ui {
@@ -14,6 +16,7 @@ class SimulationDialog : public QDialog
 
 public:
     explicit SimulationDialog(std::unique_ptr<sosim::Simulator> sim,
+                              unsigned simulationTimeStep,
                               QWidget *parent = 0);
     ~SimulationDialog();
 
@@ -21,7 +24,6 @@ public:
 
     void performTick();
     void updateScreen();
-
     void updateTimeline();
     void updateRAM();
     void updateDisk();
@@ -32,7 +34,14 @@ protected:
 
 private:
     std::unique_ptr<sosim::Simulator> sim;
-    int timer;
+    unsigned simulationTimeStep;
+    int timerHandle;
+
+    QLabel* responseLabel;
+    QTableWidget* timelineTable;
+    QTableWidget* ramTable;
+    QTableWidget* diskTable;
+    QTableWidget* pageTable;
 
     Ui::SimulationDialog *ui;
 };
