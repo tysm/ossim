@@ -96,9 +96,8 @@ class EDF : public Preemptive
 {
 public:
     bool is_over_deadline(unsigned current_time,
-                                  const Process& process) const
+                          const Process& process) const override
     {
-        fputs("IS OVER DEADLINE = TRUE\n", stderr);
         return current_time - process.born_time >= process.deadline;
     }
 
