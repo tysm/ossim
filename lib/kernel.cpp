@@ -8,10 +8,6 @@ void Kernel::run()
     if(cpu->state() == CPUState::Idle)
         memMng->dealloc(false);
 
-    // Running the Memory Manager and maybe unblocking some process
-    if(auto process = memMng->run())
-        scheduler->push(std::move(process));
-
     // Looking for unblocked processes
     while(!blocked.empty() && memMng->state() == MemoryManagerState::Free)
     {
@@ -22,6 +18,10 @@ void Kernel::run()
             scheduler->push(std::move(process));
         blocked.pop_front();
     }
+
+    // Running the Memory Manager and maybe unblocking some process
+    if(auto process = memMng->run())
+        scheduler->push(std::move(process));
 
     // Inserting new processes
     while(!push_requests.empty())

@@ -30,7 +30,7 @@ public:
     explicit MemoryManager(unsigned shift_delay, size_t virtual_pages,
                            size_t ram_pages) :
         shift_delay(shift_delay), page_table(virtual_pages, {-1, false}),
-        ram(ram_pages, {0, -1})
+        ram(ram_pages, {0, -1}), alloc_enabled(false)
     {
     }
 
@@ -73,6 +73,26 @@ public:
     }
 
 private:
+    /// Enables paging if there're a valid allocation positions.
+    void is_able_to_alloc(bool check_virtual)
+    {
+        if(alloc_enabled)
+            return;
+        alloc_enabled = true;
+
+        if(check_virtual)
+        {
+            auto virtual_position = this->virtual_position();
+            if(!valid_virtual_position(virtual_position))
+                alloc_enabled = false;
+            regress_virtual_position();
+        }
+        auto alloc_position = this->alloc_position();
+        if(!valid_alloc_position(alloc_position))
+            alloc_enabled = false;
+        regress_alloc_position();
+    }
+
     /// Tries to allocate a page refered by 'ref' of some process with ID pid.
     ///
     /// When 'force_alloc', it performs paging.
@@ -98,11 +118,16 @@ private:
         return -1;
     }
 
-    /// Returns a valid (free) virtual allocation position in 'page_table'.
+    /// Returns the next virtual allocation position in 'page_table'.
     virtual auto virtual_position() -> size_t = 0;
 
-    /// Returns a valid (but not always free) allocation position in 'ram'.
+    /// Returns the next allocation position in 'ram'.
     virtual auto alloc_position() -> size_t = 0;
+
+    /// Undo the last 'virtual_position' call.
+    virtual void regress_virtual_position()
+    {
+    }
 
     /// Undo the last 'alloc_position' call.
     virtual void regress_alloc_position()
@@ -114,6 +139,8 @@ private:
 
     /// Paging delay per page to be paginated.
     unsigned shift_delay;
+    /// Security allocation variable.
+    bool alloc_enabled;
     /// Current delay counter.
     unsigned delay;
 
@@ -177,42 +204,52 @@ public:
     }
 
 private:
-    /// Returns a valid (free) virtual allocation position in 'page_table'.
+    /// Returns the next virtual allocation position in 'page_table'.
     auto virtual_position() -> size_t override
     {
         next_virtual_position %= page_table.size();
         auto p = next_virtual_position;
-        auto last = p;
-        while(!valid_virtual_position(p) && (++p) % page_table.size() != last)
+        last_virtual_position = p;
+        while(!valid_virtual_position(p) &&
+              (++p) % page_table.size() != last_virtual_position)
+        {
             p %= page_table.size();
-        //if(p == last)
-            // TODO catch full virtual memory error.
+        }
         next_virtual_position = p;
         return next_virtual_position++;
     }
 
-    /// Returns a valid (but not always free) allocation position in 'ram'.
+    /// Returns the next allocation position in 'ram'.
     auto alloc_position() -> size_t override
     {
-        auto p = next_alloc_position %= ram.size();
-        auto last = p;
-        while(!valid_alloc_position(p) && ++p != last)
+        next_alloc_position %= ram.size();
+        auto p = next_alloc_position;
+        last_alloc_position = p;
+        while(!valid_alloc_position(p) &&
+              (++p) % ram.size() != last_alloc_position)
+        {
             p %= ram.size();
-        //if(p == last)
-            // TODO catch full memory error.
+        }
         next_alloc_position = p;
         return next_alloc_position++;
+    }
+
+    /// Undo the last 'virtual_position' call.
+    void regress_virtual_position() override
+    {
+        next_virtual_position = last_virtual_position;
     }
 
     /// Undo the last 'alloc_position' call.
     void regress_alloc_position() override
     {
-        next_alloc_position--;
-        next_alloc_position = std::min(next_alloc_position, ram.size() - 1);
+        next_alloc_position = last_alloc_position;
     }
 
     size_t next_virtual_position;
     size_t next_alloc_position;
+    size_t last_virtual_position;
+    size_t last_alloc_position;
 };
 
 /// Coparator used by the LRU priority_queue.
@@ -265,22 +302,16 @@ private:
         this->next_alloc_position.push(alloc_it);
     }
 
-    /// Returns a valid (free) virtual allocation position in 'page_table'.
+    /// Returns the next virtual allocation position in 'page_table'.
     auto virtual_position() -> size_t override
     {
-        size_t p = next_virtual_position.top() - virtual_access_table.begin();
-        //if(!valid_virtual_position(p))
-            // TODO catch full virtual memory error.
-        return p;
+        return next_virtual_position.top() - virtual_access_table.begin();
     }
 
-    /// Returns a valid (but not always free) allocation position in 'ram'.
+    /// Returns the next allocation position in 'ram'.
     auto alloc_position() -> size_t override
     {
-        size_t p = next_alloc_position.top() - ram_access_table.begin();
-        //if(!valid_alloc_position(p))
-            // TODO catch full memory error.
-        return p;
+        return next_alloc_position.top() - ram_access_table.begin();
     }
 
     std::vector<unsigned> virtual_access_table;

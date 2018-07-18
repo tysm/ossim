@@ -6,21 +6,31 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)
     {
-        while(delay >= shift_delay && (*alloc_buffer.front()).first == size_t(-1) &&
+        while(delay >= shift_delay &&
+              (*alloc_buffer.front()).first == size_t(-1) &&
               alloc(process->pid, *alloc_buffer.front(), false))
         {
             delay -= shift_delay;
             alloc_buffer.pop_front();
+            alloc_enabled = false;
         }
+
 
         if(delay)
         {
-            delay--;
+            bool virtually_allocated = (*alloc_buffer.front()).first != size_t(-1);
 
-            if(delay%shift_delay == 0)
+            is_able_to_alloc(!virtually_allocated);
+            if(alloc_enabled)
             {
-                alloc(process->pid, *alloc_buffer.front(), true);
-                alloc_buffer.pop_front();
+                delay--;
+
+                if(delay%shift_delay == 0)
+                {
+                    alloc(process->pid, *alloc_buffer.front(), true);
+                    alloc_buffer.pop_front();
+                    alloc_enabled = false;
+                }
             }
         }
 
@@ -71,6 +81,14 @@ bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref,
                           bool force_alloc)
 {
     auto alloc_position = this->alloc_position();
+    // Fully allocated RAM.
+    if(!valid_alloc_position(alloc_position))
+    {
+        regress_alloc_position();
+        // Should the system crash?
+        return false;
+    }
+
     auto used_ref = was_allocated(alloc_position);
     // Unallocated process
     if(ref.first == size_t(-1))
@@ -81,7 +99,16 @@ bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref,
             regress_alloc_position();
             return false;
         }
-        ref.first = virtual_position();
+
+        auto virtual_position = this->virtual_position();
+        // Fully allocated virtual memory.
+        if(!valid_virtual_position(virtual_position))
+        {
+            regress_alloc_position();
+            regress_virtual_position();
+            return false;
+        }
+        ref.first = virtual_position;
     }
 
     // Process allocated but its page is in swap
