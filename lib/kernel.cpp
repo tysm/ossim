@@ -19,10 +19,6 @@ void Kernel::run()
         blocked.pop_front();
     }
 
-    // Running the Memory Manager and maybe unblocking some process
-    if(auto process = memMng->run())
-        scheduler->push(std::move(process));
-
     // Inserting new processes
     while(!push_requests.empty())
     {
@@ -43,17 +39,21 @@ void Kernel::run()
             if(cpu->state() != CPUState::Overload)
             {
                 scheduler->push(cpu->drop());
-                memMng->dealloc(true);
                 cpu->push(std::move(self));
             }
         }
         else
         {
+            memMng->dealloc(true);
             if(auto process = cpu->drop())
                 self = std::move(process);
             this->next();
         }
     }
+
+    // Running the Memory Manager and maybe unblocking some process
+    if(auto process = memMng->run())
+        scheduler->push(std::move(process));
 }
 
 void Kernel::next()

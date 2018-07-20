@@ -30,7 +30,7 @@ public:
     explicit MemoryManager(unsigned shift_delay, size_t virtual_pages,
                            size_t ram_pages) :
         shift_delay(shift_delay), page_table(virtual_pages, {-1, false}),
-        ram(ram_pages, {0, -1}), alloc_enabled(false)
+        ram(ram_pages, {0, -1})
     {
     }
 
@@ -73,26 +73,6 @@ public:
     }
 
 private:
-    /// Enables paging if there're a valid allocation positions.
-    void is_able_to_alloc(bool check_virtual)
-    {
-        if(alloc_enabled)
-            return;
-        alloc_enabled = true;
-
-        if(check_virtual)
-        {
-            auto virtual_position = this->virtual_position();
-            if(!valid_virtual_position(virtual_position))
-                alloc_enabled = false;
-            regress_virtual_position();
-        }
-        auto alloc_position = this->alloc_position();
-        if(!valid_alloc_position(alloc_position))
-            alloc_enabled = false;
-        regress_alloc_position();
-    }
-
     /// Tries to allocate a page refered by 'ref' of some process with ID pid.
     ///
     /// When 'force_alloc', it performs paging.
@@ -122,7 +102,7 @@ private:
     virtual auto virtual_position() -> size_t = 0;
 
     /// Returns the next allocation position in 'ram'.
-    virtual auto alloc_position() -> size_t = 0;
+    virtual auto alloc_position(size_t pid) -> size_t = 0;
 
     /// Undo the last 'virtual_position' call.
     virtual void regress_virtual_position()
@@ -139,8 +119,6 @@ private:
 
     /// Paging delay per page to be paginated.
     unsigned shift_delay;
-    /// Security allocation variable.
-    bool alloc_enabled;
     /// Current delay counter.
     unsigned delay;
 
@@ -164,8 +142,10 @@ protected:
     /// Checks if 'alloc_position' is a valid allocation position in 'ram'.
     ///
     /// P.S.: 'alloc_position' doesn't have to be free to be valid.
-    bool valid_alloc_position(size_t alloc_position)
+    bool valid_alloc_position(size_t alloc_position, size_t pid)
     {
+        if(ram[alloc_position].first == pid)
+            return false;
         if(refs_in_use)
         {
             for(auto ref : *refs_in_use)
@@ -210,27 +190,31 @@ private:
         next_virtual_position %= page_table.size();
         auto p = next_virtual_position;
         last_virtual_position = p;
+
         while(!valid_virtual_position(p) &&
               (++p) % page_table.size() != last_virtual_position)
         {
             p %= page_table.size();
         }
-        next_virtual_position = p;
+
+        next_virtual_position = p % page_table.size();
         return next_virtual_position++;
     }
 
     /// Returns the next allocation position in 'ram'.
-    auto alloc_position() -> size_t override
+    auto alloc_position(size_t pid) -> size_t override
     {
         next_alloc_position %= ram.size();
         auto p = next_alloc_position;
         last_alloc_position = p;
-        while(!valid_alloc_position(p) &&
+
+        while(!valid_alloc_position(p, pid) &&
               (++p) % ram.size() != last_alloc_position)
         {
             p %= ram.size();
         }
-        next_alloc_position = p;
+
+        next_alloc_position = p % ram.size();
         return next_alloc_position++;
     }
 
@@ -309,9 +293,24 @@ private:
     }
 
     /// Returns the next allocation position in 'ram'.
-    auto alloc_position() -> size_t override
+    auto alloc_position(size_t pid) -> size_t override
     {
-        return next_alloc_position.top() - ram_access_table.begin();
+        std::vector<std::vector<unsigned>::iterator > invalid_positions;
+        auto p = next_alloc_position.top() - ram_access_table.begin();
+
+        // Looking for some valid position
+        while(!next_alloc_position.empty() && !valid_alloc_position(p, pid))
+        {
+            invalid_positions.push_back(std::move(next_alloc_position.top()));
+            next_alloc_position.pop();
+            if(!next_alloc_position.empty())
+                p = next_alloc_position.top() - ram_access_table.begin();
+        }
+
+        for(auto &it : invalid_positions)
+            next_alloc_position.push(std::move(it));
+
+        return p;
     }
 
     std::vector<unsigned> virtual_access_table;

@@ -12,25 +12,19 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
         {
             delay -= shift_delay;
             alloc_buffer.pop_front();
-            alloc_enabled = false;
         }
 
 
         if(delay)
         {
-            bool virtually_allocated = (*alloc_buffer.front()).first != size_t(-1);
+            delay--;
 
-            is_able_to_alloc(!virtually_allocated);
-            if(alloc_enabled)
+            if(delay%shift_delay == 0)
             {
-                delay--;
-
-                if(delay%shift_delay == 0)
-                {
-                    alloc(process->pid, *alloc_buffer.front(), true);
+                if(alloc(process->pid, *alloc_buffer.front(), true))
                     alloc_buffer.pop_front();
-                    alloc_enabled = false;
-                }
+                else
+                    delay += shift_delay;
             }
         }
 
@@ -80,9 +74,9 @@ bool MemoryManager::try_alloc(unsigned pid,
 bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref,
                           bool force_alloc)
 {
-    auto alloc_position = this->alloc_position();
+    auto alloc_position = this->alloc_position(pid);
     // Fully allocated RAM.
-    if(!valid_alloc_position(alloc_position))
+    if(!valid_alloc_position(alloc_position, pid))
     {
         regress_alloc_position();
         // Should the system crash?
