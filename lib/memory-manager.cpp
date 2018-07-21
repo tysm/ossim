@@ -6,25 +6,27 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
 {
     if(process)
     {
-        while(delay >= shift_delay &&
+        // Trying some free alocation
+        while(victim_page == size_t(-1) &&
               (*alloc_buffer.front()).first == size_t(-1) &&
-              alloc(process->pid, *alloc_buffer.front(), false))
+              alloc(process->pid, *alloc_buffer.front()))
         {
             delay -= shift_delay;
             alloc_buffer.pop_front();
         }
 
-
         if(delay)
         {
-            delay--;
+            // We need to find some victim page
+            if(victim_page == size_t(-1))
+                choose_victim();
 
-            if(delay%shift_delay == 0)
+            // There's a victim page, so we can perform pagination
+            if(victim_page != size_t(-1))
             {
-                if(alloc(process->pid, *alloc_buffer.front(), true))
-                    alloc_buffer.pop_front();
-                else
-                    delay += shift_delay;
+                delay--;
+                if(delay%shift_delay == 0)
+                    pagination();
             }
         }
 
@@ -32,6 +34,73 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
             return std::move(process);
     }
     return nullptr;
+}
+
+void MemoryManager::choose_victim()
+{
+    // Looking for some valid victim in 'ram'
+    victim_page = this->alloc_position(process->pid);
+    if(!valid_alloc_position(victim_page, process->pid))
+    {
+        regress_alloc_position();
+        victim_page = -1;
+    }
+    else
+    {
+        auto &ref = *alloc_buffer.front();
+        // Checking if the 'ref' needs 'page_table' space
+        if(ref.first == size_t(-1))
+        {
+            auto virtual_position = this->virtual_position();
+            if(!valid_virtual_position(virtual_position))
+            {
+                regress_alloc_position();
+                regress_virtual_position();
+                victim_page = -1;
+            }
+            else
+                ref.first = virtual_position;
+        }
+
+        if(ref.first != size_t(-1))
+        {
+            victim_ref = was_allocated(victim_page);
+            // Invalidating the last 'victim_page' reference in 'page_table'
+            if(victim_ref != size_t(-1))
+                page_table[victim_ref].second = false;
+
+            // Preparing the 'page_table'
+            page_table[ref.first] = {victim_page, false};
+
+            // New access successfully
+            make_updates(ref.first, victim_page);
+        }
+    }
+}
+
+void MemoryManager::pagination()
+{
+    auto &ref = *alloc_buffer.front();
+
+    // Checking if the referenced page is in 'swap'
+    auto it = swap.begin();
+    while(it != swap.end() && ((*it).first != process->pid || (*it).second != ref.second))
+        it++;
+    // Then remove it
+    if(it != swap.end())
+        swap.erase(it);
+
+    // Sending the 'victim_page' to 'swap'
+    if(victim_ref != size_t(-1))
+        swap.push_back(ram[victim_page]);
+
+    // Inserting the referenced page in 'ram'
+    ram[victim_page] = {process->pid, ref.second};
+    // Updating the 'page_table'
+    page_table[ref.first].second = true;
+
+    alloc_buffer.pop_front();
+    victim_page = -1;
 }
 
 void MemoryManager::push(std::unique_ptr<Process> process)
@@ -56,7 +125,7 @@ bool MemoryManager::try_alloc(unsigned pid,
     {
         auto &ref = (*page_refs)[i];
         // Unallocated process
-        if(ref.first == size_t(-1) && !alloc(pid, ref, false))
+        if(ref.first == size_t(-1) && !alloc(pid, ref))
             return false;
 
         // Page fault
@@ -71,55 +140,38 @@ bool MemoryManager::try_alloc(unsigned pid,
     return true;
 }
 
-bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref,
-                          bool force_alloc)
+bool MemoryManager::alloc(unsigned pid, std::pair<size_t, size_t> &ref)
 {
+    auto virtual_position = this->virtual_position();
+    // Fully allocated virtual memory
+    if(!valid_virtual_position(virtual_position))
+    {
+        regress_virtual_position();
+        return false;
+    }
+
     auto alloc_position = this->alloc_position(pid);
-    // Fully allocated RAM.
+    // Fully allocated RAM
     if(!valid_alloc_position(alloc_position, pid))
     {
+        regress_virtual_position();
         regress_alloc_position();
         // Should the system crash?
         return false;
     }
 
     auto used_ref = was_allocated(alloc_position);
-    // Unallocated process
-    if(ref.first == size_t(-1))
-    {
-        // There's not empty space, can't alloc
-        if(!force_alloc && used_ref != size_t(-1))
-        {
-            regress_alloc_position();
-            return false;
-        }
-
-        auto virtual_position = this->virtual_position();
-        // Fully allocated virtual memory.
-        if(!valid_virtual_position(virtual_position))
-        {
-            regress_alloc_position();
-            regress_virtual_position();
-            return false;
-        }
-        ref.first = virtual_position;
-    }
-
-    // Process allocated but its page is in swap
-    else
-    {
-        auto it = swap.begin();
-        while((*it).first != pid || (*it).second != ref.second)
-            it++;
-        swap.erase(it);
-    }
-
-    // Allocating in ram
+    // Position is ocupied
     if(used_ref != size_t(-1))
     {
-        page_table[used_ref].second = false;
-        swap.push_back(ram[alloc_position]);
+        regress_virtual_position();
+        regress_alloc_position();
+        return false;
     }
+
+    ref.first = virtual_position;
+
+    // Allocating in ram
     ram[alloc_position] = {pid, ref.second};
     page_table[ref.first] = {alloc_position, true};
 

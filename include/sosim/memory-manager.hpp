@@ -30,7 +30,7 @@ public:
     explicit MemoryManager(unsigned shift_delay, size_t virtual_pages,
                            size_t ram_pages) :
         shift_delay(shift_delay), page_table(virtual_pages, {-1, false}),
-        ram(ram_pages, {0, -1})
+        ram(ram_pages, {0, -1}), victim_page(-1), victim_ref(-1)
     {
     }
 
@@ -73,10 +73,14 @@ public:
     }
 
 private:
+    /// Set the 'victim_page' and prepares the pagination.
+    void choose_victim();
+
+    /// Performs pagination.
+    void pagination();
+
     /// Tries to allocate a page refered by 'ref' of some process with ID pid.
-    ///
-    /// When 'force_alloc', it performs paging.
-    bool alloc(unsigned pid, std::pair<size_t, size_t> &ref, bool force_alloc);
+    bool alloc(unsigned pid, std::pair<size_t, size_t> &ref);
 
     /// Makes updates needed by the current memory manager.
     virtual void make_updates(size_t virtual_position, size_t alloc_position)
@@ -121,6 +125,14 @@ private:
     unsigned shift_delay;
     /// Current delay counter.
     unsigned delay;
+    /// Page to be overwritten in pagination.
+    ///
+    /// When it's != size_t(-1) means that paging is occurring.
+    size_t victim_page;
+    /// The ref in 'page_table' that points to 'victim_page'.
+    ///
+    /// When it's != size_t(-1) the victim_page must be sent to 'swap'.
+    size_t victim_ref;
 
 public: // MAIS CAGADAS (TODO)
     /// Disk space abstraction.
