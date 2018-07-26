@@ -7,7 +7,8 @@ auto MemoryManager::run() -> std::unique_ptr<Process>
     if(process)
     {
         // Trying some free alocation
-        while(victim_page == size_t(-1) &&
+        while(!alloc_buffer.empty() &&
+              victim_page == size_t(-1) &&
               (*alloc_buffer.front()).first == size_t(-1) &&
               alloc(process->pid, *alloc_buffer.front()))
         {
