@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 #include <utility>
-#include <sosim/commom.hpp>
+#include <ossim/commom.hpp>
 
-namespace sosim
+namespace ossim
 {
 enum class CPUState
 {

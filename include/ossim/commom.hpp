@@ -3,7 +3,7 @@
 #include <memory>
 #include <utility>
 
-namespace sosim
+namespace ossim
 {
 template <class T, class U>
 using vector_pair = std::vector<std::pair<T, U> >;
@@ -27,7 +27,7 @@ struct Process
 
     /// The process page references:
     ///
-    /// Each reference is a pair, where the first is the address and the second
+    /// Each reference is a pair, where the first is the address
     /// and the second represents the index of the process page.
     std::shared_ptr<vector_pair<size_t, size_t> > page_refs;
 

@@ -1,4 +1,4 @@
-#include <sosim/simulator.hpp>
+#include <ossim/simulator.hpp>
 
 #ifdef __unix__
 #include <unistd.h>
@@ -7,7 +7,7 @@
 #define sleep(n) Sleep(n*int(1e3))
 #endif
 
-namespace sosim
+namespace ossim
 {
 void Simulator::run()
 {

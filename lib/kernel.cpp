@@ -1,6 +1,6 @@
-#include <sosim/kernel.hpp>
+#include <ossim/kernel.hpp>
 
-namespace sosim
+namespace ossim
 {
 void Kernel::run()
 {

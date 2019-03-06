@@ -5,9 +5,9 @@
 #include <memory>
 #include <utility>
 #include <algorithm>
-#include <sosim/commom.hpp>
+#include <ossim/commom.hpp>
 
-namespace sosim
+namespace ossim
 {
 /// The possible states a memory manager.
 enum class MemoryManagerState
@@ -16,7 +16,7 @@ enum class MemoryManagerState
     Free,
 };
 
-/// The subclass of a memory manager.
+/// The subclasses of a memory manager.
 enum class MemoryManagerKind
 {
     FIFO_MM,
@@ -248,7 +248,7 @@ private:
     size_t last_alloc_position;
 };
 
-/// Coparator used by the LRU priority_queue.
+/// Comparator used by the LRU priority_queue.
 class LRUComparator
 {
 public:

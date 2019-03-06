@@ -1,6 +1,6 @@
-#include <sosim/memory-manager.hpp>
+#include <ossim/memory-manager.hpp>
 
-namespace sosim
+namespace ossim
 {
 auto MemoryManager::run() -> std::unique_ptr<Process>
 {

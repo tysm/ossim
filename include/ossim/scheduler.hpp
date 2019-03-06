@@ -3,9 +3,9 @@
 #include <memory>
 #include <utility>
 #include <algorithm>
-#include <sosim/commom.hpp>
+#include <ossim/commom.hpp>
 
-namespace sosim
+namespace ossim
 {
 enum class SchedulerKind
 {

@@ -2,12 +2,12 @@
 #include <list>
 #include <memory>
 #include <utility>
-#include <sosim/commom.hpp>
-#include <sosim/cpu.hpp>
-#include <sosim/scheduler.hpp>
-#include <sosim/memory-manager.hpp>
+#include <ossim/commom.hpp>
+#include <ossim/cpu.hpp>
+#include <ossim/scheduler.hpp>
+#include <ossim/memory-manager.hpp>
 
-namespace sosim
+namespace ossim
 {
 class Kernel
 {
