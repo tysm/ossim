@@ -1,7 +1,6 @@
 BUILD_DIR ?= ./build
 MKDIR_P ?= mkdir -p
 
-CXX := clang
 CXXFLAGS += -std=c++17 -pedantic -Wall -Wextra -O0 -g
 INCLUDE += -I include
 DEFINE +=
