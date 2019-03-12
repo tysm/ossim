@@ -8,9 +8,13 @@ CPPFLAGS += $(DEFINE) $(INCLUDE) -MMD -MP
 
 LIBOSSIM_SRC := $(shell find lib -name *.cpp)
 LIBOSSIM_OBJ := $(LIBOSSIM_SRC:%=$(BUILD_DIR)/%.o)
-LIBOSSIM_DEP := $(LIBOSSIM_OBJ:.o=.d)
+LIBOSSIM_PIC_OBJ := $(LIBOSSIM_SRC:%=$(BUILD_DIR)/%.pic.o)
+LIBOSSIM_DEP := $(LIBOSSIM_OBJ:.o=.d) $(LIBOSSIM_PIC_OBJ:.o=.d)
 
-all: libossim.a
+all: libossim.so libossim.a
+
+libossim.so: $(LIBOSSIM_PIC_OBJ)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -shared -fPIC $(LIBOSSIM_PIC_OBJ) -o $@
 
 libossim.a: $(LIBOSSIM_OBJ)
 	ar rcs $@ $(LIBOSSIM_OBJ)
@@ -19,9 +23,14 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
+$(BUILD_DIR)/%.cpp.pic.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) -fPIC $(CXXFLAGS) -c $< -o $@
+
 clean:
 	$(RM) -r $(BUILD_DIR)
 	$(RM) libossim.a
+	$(RM) libossim.so
 
 tidy:
 	clang-tidy $(LIBOSSIM_SRC) -- $(INCLUDE) $(DEFINE) $(CXXFLAGS)
