@@ -26,26 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         simulatorgui.cpp \
-    ../../lib/kernel.cpp \
-    ../../lib/memory-manager.cpp \
-    ../../lib/simulator.cpp \
-    processdialog.cpp \
-    simulationdialog.cpp
+        processdialog.cpp \
+        simulationdialog.cpp
 
 HEADERS += \
         simulatorgui.h \
-    ../../include/sosim/commom.hpp \
-    ../../include/sosim/cpu.hpp \
-    ../../include/sosim/kernel.hpp \
-    ../../include/sosim/memory-manager.hpp \
-    ../../include/sosim/scheduler.hpp \
-    ../../include/sosim/simulator.hpp \
-    processdialog.h \
-    simulationdialog.h
+        processdialog.h \
+        simulationdialog.h
 
 FORMS += \
         simulatorgui.ui \
-    processdialog.ui \
-    simulationdialog.ui
-
-INCLUDEPATH += ../../include
+        processdialog.ui \
+        simulationdialog.ui

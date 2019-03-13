@@ -1,6 +1,6 @@
 #include "simulationdialog.h"
 #include "ui_simulationdialog.h"
-using namespace sosim;
+using namespace ossim;
 
 static const QColor colorTable[] = {
     // Qt::red,
@@ -10,7 +10,7 @@ static const QColor colorTable[] = {
     Qt::lightGray, Qt::darkGray, Qt::black,
 };
 
-SimulationDialog::SimulationDialog(std::unique_ptr<sosim::Simulator> sim_,
+SimulationDialog::SimulationDialog(std::unique_ptr<ossim::Simulator> sim_,
                                    unsigned simulationTimeStep_,
                                    QWidget *parent)
     : QDialog(parent), ui(new Ui::SimulationDialog), sim(std::move(sim_)),

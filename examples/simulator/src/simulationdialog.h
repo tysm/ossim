@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QLabel>
 #include <QTableWidget>
-#include <sosim/simulator.hpp>
+#include <ossim/simulator.hpp>
 
 namespace Ui {
 class SimulationDialog;
@@ -15,7 +15,7 @@ class SimulationDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SimulationDialog(std::unique_ptr<sosim::Simulator> sim,
+    explicit SimulationDialog(std::unique_ptr<ossim::Simulator> sim,
                               unsigned simulationTimeStep,
                               QWidget *parent = 0);
     ~SimulationDialog();
@@ -33,7 +33,7 @@ protected:
     virtual void timerEvent(QTimerEvent* event);
 
 private:
-    std::unique_ptr<sosim::Simulator> sim;
+    std::unique_ptr<ossim::Simulator> sim;
     unsigned simulationTimeStep;
     int timerHandle;
 

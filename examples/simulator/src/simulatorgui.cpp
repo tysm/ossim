@@ -2,8 +2,8 @@
 #include "processdialog.h"
 #include "simulationdialog.h"
 #include "ui_simulatorgui.h"
-#include <sosim/simulator.hpp>
-using namespace sosim;
+#include <ossim/simulator.hpp>
+using namespace ossim;
 
 SimulatorGUI::SimulatorGUI(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::SimulatorGUI) {
@@ -37,7 +37,7 @@ void SimulatorGUI::on_Next_clicked() {
   else if (this->findChild<QPushButton *>("LRU")->isChecked())
     mman = MemoryManagerKind::LRU;
 
-  auto sim = std::make_unique<sosim::Simulator>();
+  auto sim = std::make_unique<ossim::Simulator>();
   sim->set_kernel(scheduler, quantum, overload, mman, shiftDelay, virtualPages,
                   ramPages);
 
