@@ -14,5 +14,5 @@ make
 
 ## Example
 
-You can find an application for this lib in `examples`. It's an implementation, made by my mates, of a simulator using Qt as fron end.
+You can find an application for this lib in `examples`. It's an implementation made by my mates of a simulator using Qt as front end.
 
