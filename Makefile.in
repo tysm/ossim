@@ -11,13 +11,13 @@ LIBOSSIM_OBJ := $(LIBOSSIM_SRC:%=$(BUILD_DIR)/%.o)
 LIBOSSIM_PIC_OBJ := $(LIBOSSIM_SRC:%=$(BUILD_DIR)/%.pic.o)
 LIBOSSIM_DEP := $(LIBOSSIM_OBJ:.o=.d) $(LIBOSSIM_PIC_OBJ:.o=.d)
 
-all: libossim.so libossim.a
-
-libossim.so: $(LIBOSSIM_PIC_OBJ)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -shared -fPIC $(LIBOSSIM_PIC_OBJ) -o $@
+all: libossim.a libossim.so
 
 libossim.a: $(LIBOSSIM_OBJ)
 	ar rcs $@ $(LIBOSSIM_OBJ)
+
+libossim.so: $(LIBOSSIM_PIC_OBJ)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -shared -fPIC $(LIBOSSIM_PIC_OBJ) -o $@
 
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
@@ -26,6 +26,16 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 $(BUILD_DIR)/%.cpp.pic.o: %.cpp
 	$(MKDIR_P) $(dir $@)
 	$(CXX) $(CPPFLAGS) -fPIC $(CXXFLAGS) -c $< -o $@
+
+install: libossim.so
+	$(MKDIR_P) $(PREFIX)/lib
+	$(MKDIR_P) $(PREFIX)/include
+	mv $< $(PREFIX)/lib/
+	cp -r include/ossim $(PREFIX)/include/
+
+uninstall:
+	$(RM) $(PREFIX)/lib/libossim.so
+	$(RM) -r $(PREFIX)/include/ossim
 
 clean:
 	$(RM) -r $(BUILD_DIR)
@@ -40,4 +50,4 @@ format:
 
 -include $(LIBOSSIM_DEP)
 
-.PHONY: all clean tidy format
+.PHONY: all install clean tidy format
