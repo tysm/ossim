@@ -9,7 +9,18 @@ The library currently offers two different memory managers that can be combined 
 There are no depencencies beyond a C++17 compiler.
 
 ```
+./configure
 make
+```
+
+It will produce both shared and static library.
+
+## Installing
+
+After building, run:
+
+```
+make install
 ```
 
 ## Example
