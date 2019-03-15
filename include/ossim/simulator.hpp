@@ -1,7 +1,7 @@
 #pragma once
 #include <list>
 #include <memory>
-#include <ossim/commom.hpp>
+#include <ossim/common.hpp>
 #include <ossim/cpu.hpp>
 #include <ossim/kernel.hpp>
 #include <ossim/memory-manager.hpp>

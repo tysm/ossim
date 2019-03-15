@@ -38,3 +38,5 @@ FORMS += \
         simulatorgui.ui \
         processdialog.ui \
         simulationdialog.ui
+
+LIBS += -lossim

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <list>
 #include <memory>
-#include <ossim/commom.hpp>
+#include <ossim/common.hpp>
 #include <queue>
 #include <utility>
 #include <vector>

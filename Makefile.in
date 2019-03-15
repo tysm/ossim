@@ -1,6 +1,9 @@
 BUILD_DIR ?= ./build
 MKDIR_P ?= mkdir -p
 
+VMAJOR := 0
+VMINOR := 1
+
 CXXFLAGS += -std=c++17 -pedantic -Wall -Wextra -O0 -g
 INCLUDE += -I include
 DEFINE +=
@@ -30,11 +33,17 @@ $(BUILD_DIR)/%.cpp.pic.o: %.cpp
 install: libossim.so
 	$(MKDIR_P) $(PREFIX)/lib
 	$(MKDIR_P) $(PREFIX)/include
-	mv $< $(PREFIX)/lib/
+	cp $< $(PREFIX)/lib/$<.$(VMAJOR).$(VMINOR)
+	ln -s $(PREFIX)/lib/$<.$(VMAJOR).$(VMINOR) $(PREFIX)/lib/$<.$(VMAJOR)
+	ln -s $(PREFIX)/lib/$<.$(VMAJOR) $(PREFIX)/lib/$<
+	ldconfig
 	cp -r include/ossim $(PREFIX)/include/
 
 uninstall:
 	$(RM) $(PREFIX)/lib/libossim.so
+	$(RM) $(PREFIX)/lib/libossim.so.$(VMAJOR)
+	$(RM) $(PREFIX)/lib/libossim.so.$(VMAJOR).$(VMINOR)
+	ldconfig
 	$(RM) -r $(PREFIX)/include/ossim
 
 clean:

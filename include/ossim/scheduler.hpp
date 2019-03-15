@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <list>
 #include <memory>
-#include <ossim/commom.hpp>
+#include <ossim/common.hpp>
 #include <utility>
 
 namespace ossim {
