@@ -8,7 +8,7 @@ The library currently offers two different memory managers that can be combined 
 
 There are no depencencies beyond a C++17 compiler.
 
-```
+```{bash}
 ./configure
 make
 ```
@@ -19,7 +19,7 @@ It will produce both shared and static library.
 
 After building, run:
 
-```
+```{bash}
 make install
 ```
 
@@ -27,3 +27,10 @@ make install
 
 You can find an application for this lib in `examples`. It's an implementation made by my mates of a simulator using Qt as front end.
 
+### Images
+
+![OS Simulator](examples/images/simulatorgui.png)
+
+![Push Process](examples/images/processdialog.png)
+
+![Simulation](examples/images/simulationdialog.png)
