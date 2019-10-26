@@ -17,11 +17,11 @@ SimulationDialog::SimulationDialog(std::unique_ptr<ossim::Simulator> sim_,
       simulationTimeStep(simulationTimeStep_) {
   ui->setupUi(this);
 
-  this->timelineTable = this->findChild<QTableWidget *>("timelineTable");
-  this->responseLabel = this->findChild<QLabel *>("responseLabel");
-  this->ramTable = this->findChild<QTableWidget *>("ramTable");
-  this->diskTable = this->findChild<QTableWidget *>("diskTable");
-  this->pageTable = this->findChild<QTableWidget *>("pageTable");
+  this->timelineTable = this->findChild<QTableWidget *>("timeline");
+  this->responseLabel = this->findChild<QLabel *>("lbl_response");
+  this->ramTable = this->findChild<QTableWidget *>("ram");
+  this->diskTable = this->findChild<QTableWidget *>("disk");
+  this->pageTable = this->findChild<QTableWidget *>("pages");
 
   for (int i = 0; i < ramTable->rowCount(); ++i) {
     for (int j = 0; j < ramTable->columnCount(); ++j)

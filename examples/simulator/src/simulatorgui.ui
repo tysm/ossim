@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>399</height>
+    <width>421</width>
+    <height>331</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SimulatorGUI</string>
+   <string>OS Simulator</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="Next">
+   <widget class="QPushButton" name="btn_next">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>300</y>
+      <x>330</x>
+      <y>290</y>
       <width>80</width>
       <height>25</height>
      </rect>
@@ -27,116 +27,90 @@
      <string>Next</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
+   <widget class="QLabel" name="lbl_number_of_processes">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>260</y>
-      <width>111</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Number of Process</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>260</y>
-      <width>54</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Delay</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
       <y>200</y>
       <width>151</width>
-      <height>20</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Number of Virtual Pages</string>
+     <string>Number of Processes:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="lbl_delay">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>100</y>
+      <x>10</x>
+      <y>290</y>
       <width>41</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Paging </string>
+     <string>Delay:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
+   <widget class="QLabel" name="lbl_number_of_virtual_pages">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>120</y>
-      <width>54</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Delay</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
+      <x>190</x>
       <y>100</y>
-      <width>54</width>
-      <height>17</height>
+      <width>171</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Number</string>
+     <string>Number of Virtual Pages:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_7">
+   <widget class="QLabel" name="lbl_paging_delay">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>120</y>
-      <width>81</width>
-      <height>17</height>
+      <x>190</x>
+      <y>160</y>
+      <width>91</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>of RAM Pages</string>
+     <string>Paging Delay:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="lbl_number_of_ram_pages">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>30</y>
-      <width>54</width>
-      <height>17</height>
+      <x>190</x>
+      <y>130</y>
+      <width>161</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Schedule</string>
+     <string>Number of RAM Pages:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
+   <widget class="QLabel" name="lbl_scheduler">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>110</y>
-      <width>131</width>
+      <y>10</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scheduler</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_memory_manager">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>121</width>
       <height>20</height>
      </rect>
     </property>
@@ -144,11 +118,11 @@
      <string>Memory Manager</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="pDelay">
+   <widget class="QSpinBox" name="pagingDelay">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>140</y>
+      <x>370</x>
+      <y>160</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -160,11 +134,11 @@
      <number>50</number>
     </property>
    </widget>
-   <widget class="QSpinBox" name="nRAM">
+   <widget class="QSpinBox" name="nRAMPages">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>140</y>
+      <x>370</x>
+      <y>130</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -179,30 +153,30 @@
      <number>50</number>
     </property>
    </widget>
-   <widget class="QSpinBox" name="nVirtual">
+   <widget class="QSpinBox" name="nVirtualPages">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>370</x>
+      <y>100</y>
+      <width>45</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="value">
+     <number>50</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="nProcesses">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
       <y>200</y>
-      <width>45</width>
-      <height>26</height>
-     </rect>
-    </property>
-    <property name="minimum">
-     <number>10</number>
-    </property>
-    <property name="maximum">
-     <number>100</number>
-    </property>
-    <property name="value">
-     <number>50</number>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="nProcs">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>260</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -226,8 +200,8 @@
    <widget class="QSpinBox" name="delay">
     <property name="geometry">
      <rect>
-      <x>260</x>
-      <y>260</y>
+      <x>170</x>
+      <y>290</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -242,13 +216,13 @@
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>341</width>
+      <x>10</x>
+      <y>10</y>
+      <width>401</width>
       <height>80</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="scheduler">
      <item>
       <widget class="QPushButton" name="FIFO_S">
        <property name="text">
@@ -309,13 +283,13 @@
    <widget class="QWidget" name="horizontalLayoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>120</y>
-      <width>168</width>
+      <x>10</x>
+      <y>100</y>
+      <width>171</width>
       <height>80</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="memory_manager">
      <item>
       <widget class="QPushButton" name="FIFO_MM">
        <property name="text">
@@ -347,11 +321,11 @@
      </item>
     </layout>
    </widget>
-   <widget class="QSpinBox" name="quantumBox">
+   <widget class="QSpinBox" name="quantum">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>300</y>
+      <x>170</x>
+      <y>230</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -360,11 +334,11 @@
      <number>3</number>
     </property>
    </widget>
-   <widget class="QSpinBox" name="overloadBox">
+   <widget class="QSpinBox" name="overload">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>300</y>
+      <x>170</x>
+      <y>260</y>
       <width>45</width>
       <height>26</height>
      </rect>
@@ -373,58 +347,52 @@
      <number>1</number>
     </property>
    </widget>
-   <widget class="QLabel" name="label_10">
+   <widget class="QLabel" name="lbl_quantum">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>310</y>
-      <width>54</width>
-      <height>17</height>
+      <x>10</x>
+      <y>230</y>
+      <width>71</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Quantum</string>
+     <string>Quantum:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_11">
+   <widget class="QLabel" name="lbl_overload">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>300</y>
-      <width>54</width>
-      <height>17</height>
+      <x>10</x>
+      <y>260</y>
+      <width>71</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Overload</string>
+     <string>Overload:</string>
     </property>
    </widget>
+   <zorder>btn_next</zorder>
+   <zorder>lbl_number_of_processes</zorder>
+   <zorder>lbl_delay</zorder>
+   <zorder>lbl_number_of_virtual_pages</zorder>
+   <zorder>lbl_paging_delay</zorder>
+   <zorder>lbl_number_of_ram_pages</zorder>
+   <zorder>pagingDelay</zorder>
+   <zorder>nRAMPages</zorder>
+   <zorder>nVirtualPages</zorder>
+   <zorder>nProcesses</zorder>
+   <zorder>delay</zorder>
+   <zorder>horizontalLayoutWidget</zorder>
+   <zorder>horizontalLayoutWidget_2</zorder>
+   <zorder>quantum</zorder>
+   <zorder>overload</zorder>
+   <zorder>lbl_quantum</zorder>
+   <zorder>lbl_overload</zorder>
+   <zorder>lbl_scheduler</zorder>
+   <zorder>lbl_memory_manager</zorder>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>398</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuSO_Simulator">
-    <property name="title">
-     <string>SO Simulator</string>
-    </property>
-   </widget>
-   <addaction name="menuSO_Simulator"/>
-  </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

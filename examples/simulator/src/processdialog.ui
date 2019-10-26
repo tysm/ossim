@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>221</width>
+    <height>211</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,12 +16,12 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="btn_confirm">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>240</y>
-     <width>341</width>
+     <x>20</x>
+     <y>170</y>
+     <width>171</width>
      <height>32</height>
     </rect>
    </property>
@@ -32,12 +32,12 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QSpinBox" name="pidBox">
+  <widget class="QSpinBox" name="pid">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>60</y>
-     <width>91</width>
+     <x>150</x>
+     <y>10</y>
+     <width>51</width>
      <height>26</height>
     </rect>
    </property>
@@ -48,35 +48,22 @@
     <number>20</number>
    </property>
   </widget>
-  <widget class="QSpinBox" name="bornBox">
+  <widget class="QSpinBox" name="bornTime">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>110</y>
-     <width>45</width>
+     <x>150</x>
+     <y>100</y>
+     <width>51</width>
      <height>26</height>
     </rect>
    </property>
   </widget>
-  <widget class="QSpinBox" name="nPagesBox">
+  <widget class="QSpinBox" name="nPages">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>50</y>
-     <width>45</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="value">
-    <number>10</number>
-   </property>
-  </widget>
-  <widget class="QSpinBox" name="execBox">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>110</y>
-     <width>45</width>
+     <x>150</x>
+     <y>70</y>
+     <width>51</width>
      <height>26</height>
     </rect>
    </property>
@@ -84,99 +71,99 @@
     <number>10</number>
    </property>
   </widget>
-  <widget class="QSpinBox" name="deadBox">
+  <widget class="QSpinBox" name="executionTime">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>170</y>
-     <width>45</width>
+     <x>150</x>
+     <y>40</y>
+     <width>51</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="value">
+    <number>10</number>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="deadline">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>130</y>
+     <width>51</width>
      <height>26</height>
     </rect>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="lbl_process_id">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>60</y>
-     <width>31</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>PID</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>110</y>
-     <width>61</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Born Time</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>54</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Deadline</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>200</x>
-     <y>60</y>
-     <width>71</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Num Pages</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>110</y>
-     <width>91</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Execution Time</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
+     <x>20</x>
      <y>10</y>
      <width>81</width>
-     <height>17</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="text">
-    <string>Push Process</string>
+    <string>Process ID:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_born_time">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>100</y>
+     <width>81</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Born Time:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_deadline">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>130</y>
+     <width>71</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Deadline:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_number_of_pages">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>70</y>
+     <width>121</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Number of Pages:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_execution_time">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>40</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Execution Time:</string>
    </property>
   </widget>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>btn_confirm</sender>
    <signal>accepted()</signal>
    <receiver>ProcessDialog</receiver>
    <slot>accept()</slot>
@@ -192,7 +179,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>btn_confirm</sender>
    <signal>rejected()</signal>
    <receiver>ProcessDialog</receiver>
    <slot>reject()</slot>
