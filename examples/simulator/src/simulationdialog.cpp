@@ -11,7 +11,7 @@ static const QColor colorTable[] = {
 };
 
 SimulationDialog::SimulationDialog(std::unique_ptr<ossim::Simulator> sim_,
-                                   unsigned simulationTimeStep_,
+                                   quint32 simulationTimeStep_,
                                    QWidget *parent)
     : QDialog(parent), ui(new Ui::SimulationDialog), sim(std::move(sim_)),
       simulationTimeStep(simulationTimeStep_) {
