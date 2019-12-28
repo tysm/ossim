@@ -13,28 +13,28 @@ SimulatorGUI::SimulatorGUI(QWidget *parent)
 SimulatorGUI::~SimulatorGUI() { delete ui; }
 
 void SimulatorGUI::on_btn_next_released() {
-  auto simuDelay = this->findChild<QSpinBox *>("delay")->value();
-  auto numProcs = this->findChild<QSpinBox *>("nProcesses")->value();
-  auto quantum = this->findChild<QSpinBox *>("quantum")->value();
-  auto overload = this->findChild<QSpinBox *>("overload")->value();
-  auto shiftDelay = this->findChild<QSpinBox *>("pagingDelay")->value();
-  auto virtualPages = this->findChild<QSpinBox *>("nVirtualPages")->value();
-  auto ramPages = this->findChild<QSpinBox *>("nRAMPages")->value();
+  auto simuDelay = findChild<QSpinBox *>("delay")->value();
+  auto numProcs = findChild<QSpinBox *>("nProcesses")->value();
+  auto quantum = findChild<QSpinBox *>("quantum")->value();
+  auto overload = findChild<QSpinBox *>("overload")->value();
+  auto shiftDelay = findChild<QSpinBox *>("pagingDelay")->value();
+  auto virtualPages = findChild<QSpinBox *>("nVirtualPages")->value();
+  auto ramPages = findChild<QSpinBox *>("nRAMPages")->value();
 
   auto scheduler = SchedulerKind::FIFO_S;
-  if (this->findChild<QPushButton *>("FIFO_S")->isChecked())
+  if (findChild<QPushButton *>("FIFO_S")->isChecked())
     scheduler = SchedulerKind::FIFO_S;
-  else if (this->findChild<QPushButton *>("SJF")->isChecked())
+  else if (findChild<QPushButton *>("SJF")->isChecked())
     scheduler = SchedulerKind::SJF;
-  else if (this->findChild<QPushButton *>("EDF")->isChecked())
+  else if (findChild<QPushButton *>("EDF")->isChecked())
     scheduler = SchedulerKind::EDF;
-  else if (this->findChild<QPushButton *>("RoundRobin")->isChecked())
+  else if (findChild<QPushButton *>("RoundRobin")->isChecked())
     scheduler = SchedulerKind::RoundRobin;
 
   auto mman = MemoryManagerKind::FIFO_MM;
-  if (this->findChild<QPushButton *>("FIFO_MM")->isChecked())
+  if (findChild<QPushButton *>("FIFO_MM")->isChecked())
     mman = MemoryManagerKind::FIFO_MM;
-  else if (this->findChild<QPushButton *>("LRU")->isChecked())
+  else if (findChild<QPushButton *>("LRU")->isChecked())
     mman = MemoryManagerKind::LRU;
 
   auto sim = std::make_unique<ossim::Simulator>();

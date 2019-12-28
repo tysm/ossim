@@ -17,11 +17,11 @@ SimulationDialog::SimulationDialog(std::unique_ptr<ossim::Simulator> sim_,
       simulationTimeStep(simulationTimeStep_) {
   ui->setupUi(this);
 
-  this->timelineTable = this->findChild<QTableWidget *>("timeline");
-  this->responseLabel = this->findChild<QLabel *>("lbl_response");
-  this->ramTable = this->findChild<QTableWidget *>("ram");
-  this->diskTable = this->findChild<QTableWidget *>("disk");
-  this->pageTable = this->findChild<QTableWidget *>("pages");
+  timelineTable = findChild<QTableWidget *>("timeline");
+  responseLabel = findChild<QLabel *>("lbl_response");
+  ramTable = findChild<QTableWidget *>("ram");
+  diskTable = findChild<QTableWidget *>("disk");
+  pageTable = findChild<QTableWidget *>("pages");
 
   for (int i = 0; i < ramTable->rowCount(); ++i) {
     for (int j = 0; j < ramTable->columnCount(); ++j)
@@ -43,47 +43,47 @@ SimulationDialog::~SimulationDialog() { delete ui; }
 
 int SimulationDialog::exec() {
   responseLabel->setText("Executing...");
-  this->timerHandle = this->startTimer(500 * this->simulationTimeStep);
-  this->performTick();
+  timerHandle = startTimer(500 * simulationTimeStep);
+  performTick();
   return QDialog::exec();
 }
 
 void SimulationDialog::timerEvent(QTimerEvent *event) {
   if (sim->cpu_state() == CPUState::Idle && sim->remaining_processes() == 0) {
-    this->performTick();
-    this->killTimer(this->timerHandle);
+    performTick();
+    killTimer(timerHandle);
     responseLabel->setText(
         QString::asprintf("Turnaround: %f", sim->runtime_per_process()));
   } else {
-    this->performTick();
+    performTick();
   }
 }
 
 void SimulationDialog::performTick() {
-  this->sim->run();
-  this->updateScreen();
-  this->sim->time();
+  sim->run();
+  updateScreen();
+  sim->time();
 }
 
 void SimulationDialog::updateScreen() {
-  this->updateTimeline();
-  this->updateRAM();
-  this->updateDisk();
-  this->updatePageTable();
+  updateTimeline();
+  updateRAM();
+  updateDisk();
+  updatePageTable();
 }
 
 void SimulationDialog::updateTimeline() {
-  auto column = this->sim->cpu_time() + 1;
-  auto row = this->sim->cpu_pid();
+  auto column = sim->cpu_time() + 1;
+  auto row = sim->cpu_pid();
   auto color = Qt::yellow;
 
   if (row >= timelineTable->rowCount() ||
       column >= timelineTable->columnCount())
     return;
 
-  switch (this->sim->cpu_state()) {
+  switch (sim->cpu_state()) {
   case CPUState::Exec:
-    color = this->sim->is_over_deadline() ? Qt::gray : Qt::green;
+    color = sim->is_over_deadline() ? Qt::gray : Qt::green;
     break;
   case CPUState::Overload:
     color = Qt::red;
