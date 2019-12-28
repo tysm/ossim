@@ -17,7 +17,7 @@ class SimulationDialog : public QDialog
 public:
     explicit SimulationDialog(std::unique_ptr<ossim::Simulator> sim,
                               unsigned simulationTimeStep,
-                              QWidget *parent = 0);
+                              QWidget *parent = nullptr);
     ~SimulationDialog();
 
     virtual int exec();
