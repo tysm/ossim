@@ -1,14 +1,16 @@
 # Operating System Simulator
 
+[![Build Status](https://travis-ci.com/tysm/ossim.svg?branch=master)](https://travis-ci.com/tysm/ossim)
+
 This is an operating system simulator project for MATA58 at UFBA (Operating Systems). The library was built for the 2018.1 coursework and was subsequently used by the professor as an example for the following classes.
 
 The library currently offers two different memory managers that can be combined with four types of schedulers. It also offers base classes to create other types of tools.
 
 ## Building
 
-There are no depencencies beyond a C++17 compiler.
+There are no dependencies beyond a C++17 compiler.
 
-```{bash}
+```bash
 ./configure
 make
 ```
@@ -19,7 +21,7 @@ It will produce both shared and static library.
 
 After building, run:
 
-```{bash}
+```bash
 make install
 ```
 
